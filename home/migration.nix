@@ -266,8 +266,8 @@ in
         DarkTheme=Nord-Dark
         # 跟随系统浅色/深色设置
         UseDarkTheme=False
-        # 当被主题和桌面支持时使用系统的重点色
-        UseAccentColor=True
+        # 禁用系统重点色（避免不同 app 主题不一致）
+        UseAccentColor=False
         # 在 X11 上针对不同屏幕使用单独的 DPI
         PerScreenDPI=False
         # 固定 Wayland 的字体 DPI

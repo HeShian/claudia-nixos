@@ -38,7 +38,7 @@
       #################
       ### 自动启动  ###
       #################
-      exec-once = QT_IM_MODULE="" QT_IM_MODULES="wayland" QT_WAYLAND_TEXT_INPUT_PROTOCOL="zwp_text_input_v3" caelestia-shell
+      exec-once = caelestia-shell
       exec-once = fcitx5 -d
 
       #############################
@@ -53,8 +53,8 @@
       env = SDL_IM_MODULE,fcitx
       env = GLFW_IM_MODULE,ibus
       env = LANG,zh_CN.UTF-8
-      # Qt6 输入法模块优先级：Wayland text-input-v3 → fcitx5 DBus → ibus
-      env = QT_IM_MODULES,wayland;fcitx;ibus
+      # 锁定 Dracula 主题（防止 Caelestia 通过 dconf 覆写）
+      env = GTK_THEME,Dracula
 
       #####################
       ### 外观设置 ###
@@ -150,7 +150,8 @@
       # ==========================================================
       bind = $mainMod, Return, exec, $terminal        # 终端 (kitty)
       bind = $mainMod, T, exec, alacritty              # 终端 (alacritty)
-      bind = $mainMod, D, exec, $menu                  # 应用启动器 (fuzzel)
+      bind = $mainMod, D, exec, caelestia shell drawers toggle launcher  # Caelestia 启动器
+      bind = $mainMod, Z, exec, $menu                                  # 应用启动器 (fuzzel)
       bind = $mainMod, E, exec, $fileManager           # 文件管理器 (nautilus)
       bind = $mainMod, B, exec, firefox                 # 浏览器
 
@@ -159,7 +160,6 @@
       # ==========================================================
       bind = $mainMod, S, exec, caelestia shell drawers toggle dashboard
       bind = $mainMod, comma, exec, caelestia shell controlCenter open
-      bind = $mainMod, Z, exec, caelestia shell drawers toggle launcher
       bind = $mainMod ALT, L, exec, caelestia shell lock lock
 
       # ==========================================================
