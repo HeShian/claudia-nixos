@@ -1,0 +1,410 @@
+# =============================================================================
+# 文件名:   home/niri.nix
+# 功能描述: Niri 窗口管理器用户级配置
+# 说明:     从 ~/dotfiles/.config/niri/ 迁移至 Home Manager 管理。
+#           配置 Niri 的输入设备、光标、布局、快捷键和自动启动程序。
+#           注意：系统级启用（programs.niri.enable）在系统配置中管理。
+# =============================================================================
+{ config, pkgs, ... }:
+
+{
+  # ===========================================================================
+  # Niri 配置（通过 xdg.configFile 管理配置文件）
+  # Niri 使用 KDL 格式的配置文件，Home Manager 暂未提供原生 programs.niri 模块，
+  # 因此通过 xdg.configFile 将配置文件链接到 ~/.config/niri/config.kdl
+  # ===========================================================================
+  xdg.configFile."niri/config.kdl" = {
+    # --- 启用配置 ---
+    enable = true;
+
+    # --- 强制覆盖已存在的文件 ---
+    # 因为 home-manager 默认不会覆盖已存在的文件，
+    # 而此文件之前已存在，需要强制覆盖
+    force = true;
+
+    # --- KDL 配置内容 ---
+    text = ''
+      // ====================================================================
+      // Niri 配置文件
+      // 从 stow dotfiles 迁移至 Home Manager 管理
+      // ====================================================================
+
+      // 禁用客户端侧装饰 (CSD) 偏好
+      prefer-no-csd
+
+      // ================ 输入设备配置 ================
+      input {
+          // 键盘设置
+          keyboard {
+              xkb {
+                  layout "us"      // 使用美式键盘布局
+              }
+              repeat-delay 300     // 按键重复延迟300ms
+              repeat-rate 30       // 按键重复速率30次/秒
+          }
+
+          // 触摸板设置
+          touchpad {
+              tap                  // 启用轻触点击
+              natural-scroll       // 自然滚动方向（类似Mac）
+          }
+
+          // 鼠标设置
+          mouse {
+              accel-profile "flat" // 平坦的鼠标加速曲线
+          }
+          focus-follows-mouse max-scroll-amount="0%" // 鼠标悬停聚焦窗口
+      }
+
+      // ================ 光标样式 ================
+      cursor {
+          xcursor-theme "Bibata-Modern-Ice"
+          xcursor-size 24
+      }
+
+      // ================ 背景墙纸与概览 (Noctalia) ================
+      // 设置常规墙纸在背景层
+      layer-rule {
+          match namespace="^noctalia-wallpaper*"
+          place-within-backdrop true
+      }
+
+      // 禁用概览中的工作区阴影
+      overview {
+          workspace-shadow {
+              off
+          }
+      }
+
+      // ================ 启动时自动运行的程序 ================
+      spawn-at-startup  "noctalia-shell"
+      spawn-at-startup "clipse --listen"
+
+      // ================ 环境变量设置 ================
+      environment {
+          // Wayland相关环境变量
+          MOZ_ENABLE_WAYLAND "1"   // Firefox使用Wayland
+          XDG_SESSION_TYPE "wayland"
+          GDK_BACKEND "wayland"    // GTK应用使用Wayland
+
+          // 终端设置
+          TERM "kitty"
+          TERMINAL "kitty"
+
+          // 其他重要设置
+          QT_QPA_PLATFORMTHEME "qt6ct" // Qt主题引擎
+      }
+
+      // ================ 布局与外观设置 ================
+      layout {
+          gaps 5                   // 窗口间5像素间隙
+          background-color "transparent" // 透明workspace背景
+          center-focused-column "never" // 不自动居中聚焦的列
+          default-column-width { proportion 0.5; } // 默认宽度
+
+          // 预设列宽比例
+          preset-column-widths {
+              // proportion 0.33333  // 1/3宽度（可选）
+              proportion 0.5       // 1/2宽度
+              proportion 0.66667   // 2/3宽度
+              proportion 1.0       // 全宽
+          }
+
+          // 聚焦高亮环
+          focus-ring {
+              width 1.5
+              active-color "#7fc8ff"
+              inactive-color "#505050"
+          }
+
+          // 窗口边框样式
+          border {
+              off
+          }
+      }
+
+      // ================ 工作区定义 ================
+      workspace "a" { }
+      workspace "b" { }
+      workspace "c" { }
+
+      // ================ Noctalia 窗口规则 ================
+
+      // 默认窗口规则：圆角设置
+      window-rule {
+          geometry-corner-radius 6
+          clip-to-geometry true
+      }
+
+      // 调试/激活设置
+      debug {
+          // 允许通知操作和窗口激活
+          honor-xdg-activation-with-invalid-serial
+      }
+
+      // Firefox 窗口规则：默认最大化
+      window-rule {
+          match title="Firefox"
+          // open-on-workspace "c"  // 可选：固定到工作区c
+          open-maximized true
+      }
+
+      // clipse 剪贴板管理：浮动窗口
+      window-rule {
+          match app-id="clipse"
+          open-floating true
+      }
+
+      // ================ 显示器输出配置 ================
+      /*
+      // 多显示器配置示例（当前禁用）
+      output "DP-3" {
+          mode "3840x2160@240"  // 4K 240Hz显示器
+          scale 2               // 200%缩放
+          transform "normal"    // 无旋转
+          variable-refresh-rate on-demand=true  // 启用可变刷新率
+          position x=0 y=0      // 主显示器位置
+      }
+
+      output "DP-2" {
+          mode "2560x1440@240"  // 2K 240Hz显示器
+          scale 1               // 100%缩放
+          position x=1920 y=0   // 位于主显示器右侧
+      }
+      */
+      output "eDP-1" {
+          mode "1920x1080@60"
+          scale 1.25
+          position x=0 y=0
+      }
+
+      // ================ 截图路径设置 ================
+      screenshot-path "~/Pictures/Screenshots/Screenshot from '%Y-%m-%d %H-%M-%S'.jpg"
+
+      // ================ 快捷键绑定 ================
+      binds {
+          // -------- 启动器与系统应用 --------
+          Mod+Return hotkey-overlay-title="打开 (Kitty)" { spawn "kitty"; }
+          Mod+T hotkey-overlay-title="打开 (Alacritty)" { spawn "alacritty"; }
+          Mod+D hotkey-overlay-title="Fuzzel" { spawn-sh "fuzzel --config ~/.config/fuzzel/themes/noctalia"; }
+          Mod+B hotkey-overlay-title="firefox" { spawn "firefox"; }
+          Mod+N hotkey-overlay-title="nautilus" { spawn "nautilus"; }
+          Mod+Alt+A hotkey-overlay-title="区域截图" { screenshot; }
+          Print hotkey-overlay-title="区域截图" { screenshot; }
+          Mod+Shift+S hotkey-overlay-title="截图后编辑" { spawn  "~/.config/niri/script/edit-screenshot.sh"; }
+          Ctrl+Print hotkey-overlay-title="全屏截图" { screenshot-screen; }
+          Alt+Print hotkey-overlay-title="聚焦截图" { screenshot-window; }
+          Mod+F1 hotkey-overlay-title="重启中文输入法" { spawn-sh "pkill fcitx5 || fcitx5"; }
+          Mod+Alt+V hotkey-overlay-title="打开剪贴板" { spawn "kitty" "--class" "clipse" "clipse"; }
+
+          // -------- Noctalia 特有绑定 --------
+          Mod+S hotkey-overlay-title="控制面板" { spawn "noctalia-shell" "ipc" "call" "controlCenter" "toggle"; }
+          Mod+Comma hotkey-overlay-title="设置" { spawn "noctalia-shell" "ipc" "call" "settings" "toggle"; }
+          Super+Alt+L hotkey-overlay-title="锁屏" { spawn "noctalia-shell" "ipc" "call" "lockScreen" "lock"; }
+          Mod+Z hotkey-overlay-title="应用启动器" { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
+          Mod+Shift+Slash hotkey-overlay-title="快捷键概览" { show-hotkey-overlay; }
+
+          // -------- 焦点移动（HJKL / 方向键） --------
+          // 焦点移动（禁用重复触发）
+          Mod+Left repeat=false { focus-column-left; }
+          Mod+Down repeat=false { focus-window-down; }
+          Mod+Up repeat=false { focus-window-up; }
+          Mod+Right repeat=false { focus-column-right; }
+          Mod+H repeat=false { focus-column-left; }
+          Mod+J repeat=false { focus-window-down; }
+          Mod+K repeat=false { focus-window-up; }
+          Mod+L repeat=false { focus-column-right; }
+
+          // 窗口/列移动（带 Ctrl）
+          Mod+Ctrl+Left { move-column-left; }
+          Mod+Ctrl+Down { move-window-down; }
+          Mod+Ctrl+Up { move-window-up; }
+          Mod+Ctrl+Right { move-column-right; }
+          Mod+Ctrl+H { move-column-left; }
+          Mod+Ctrl+J { move-window-down; }
+          Mod+Ctrl+K { move-window-up; }
+          Mod+Ctrl+L { move-column-right; }
+
+          Mod+Home { focus-column-first; }
+          Mod+End { focus-column-last; }
+          Mod+Ctrl+Home { move-column-to-first; }
+          Mod+Ctrl+End { move-column-to-last; }
+
+          // -------- 显示器导航 --------
+          // 焦点切换到其他显示器（带 Shift）
+          Mod+Shift+Left { focus-monitor-left; }
+          Mod+Shift+Down { focus-monitor-down; }
+          Mod+Shift+Up { focus-monitor-up; }
+          Mod+Shift+Right { focus-monitor-right; }
+          Mod+Shift+H { focus-monitor-left; }
+          Mod+Shift+J { focus-monitor-down; }
+          Mod+Shift+K { focus-monitor-up; }
+          Mod+Shift+L { focus-monitor-right; }
+
+          // 移动列到其他显示器（带 Shift+Ctrl）
+          Mod+Shift+Ctrl+Left { move-column-to-monitor-left; }
+          Mod+Shift+Ctrl+Down { move-column-to-monitor-down; }
+          Mod+Shift+Ctrl+Up { move-column-to-monitor-up; }
+          Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
+          Mod+Shift+Ctrl+H { move-column-to-monitor-left; }
+          Mod+Shift+Ctrl+J { move-column-to-monitor-down; }
+          Mod+Shift+Ctrl+K { move-column-to-monitor-up; }
+          Mod+Shift+Ctrl+L { move-column-to-monitor-right; }
+
+          // -------- 工作区切换与移动 --------
+          Mod+1 { focus-workspace 1; }
+          Mod+2 { focus-workspace 2; }
+          Mod+3 { focus-workspace 3; }
+          Mod+4 { focus-workspace 4; }
+          Mod+5 { focus-workspace 5; }
+          Mod+6 { focus-workspace 6; }
+          Mod+7 { focus-workspace 7; }
+          Mod+8 { focus-workspace 8; }
+          Mod+9 { focus-workspace 9; }
+
+          Mod+Ctrl+1 { move-column-to-workspace 1; }
+          Mod+Ctrl+2 { move-column-to-workspace 2; }
+          Mod+Ctrl+3 { move-column-to-workspace 3; }
+          Mod+Ctrl+4 { move-column-to-workspace 4; }
+          Mod+Ctrl+5 { move-column-to-workspace 5; }
+          Mod+Ctrl+6 { move-column-to-workspace 6; }
+          Mod+Ctrl+7 { move-column-to-workspace 7; }
+          Mod+Ctrl+8 { move-column-to-workspace 8; }
+          Mod+Ctrl+9 { move-column-to-workspace 9; }
+
+          // 工作区上下切换（Page Up/Down + U/I）
+          Mod+Page_Down { focus-workspace-down; }
+          Mod+Page_Up { focus-workspace-up; }
+          Mod+U { focus-workspace-down; }
+          Mod+I { focus-workspace-up; }
+
+          Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
+          Mod+Ctrl+Page_Up { move-column-to-workspace-up; }
+          Mod+Ctrl+U { move-column-to-workspace-down; }
+          Mod+Ctrl+I { move-column-to-workspace-up; }
+
+          Mod+Shift+Page_Down { move-workspace-down; }
+          Mod+Shift+Page_Up { move-workspace-up; }
+          Mod+Shift+U { move-workspace-down; }
+          Mod+Shift+I { move-workspace-up; }
+
+          // -------- 硬件控制（音量/亮度） --------
+          XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+"; }
+          XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-"; }
+          XF86AudioMute allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
+          XF86AudioMicMute allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
+
+          XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "+10%"; }
+          XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "10%-"; }
+
+          // -------- 窗口管理 --------
+          Mod+Q hotkey-overlay-title="关闭窗口" { close-window; }
+          Mod+F hotkey-overlay-title="最大化窗口" { maximize-column; }
+          Mod+Shift+F hotkey-overlay-title="全屏窗口" { fullscreen-window; }
+          Mod+V hotkey-overlay-title="切换浮动/平铺" { toggle-window-floating; }
+          Mod+Shift+V hotkey-overlay-title="切换浮动/平铺焦点" repeat=false { switch-focus-between-floating-and-tiling; }
+          Mod+C hotkey-overlay-title="居中列" { center-column; }
+          Mod+R hotkey-overlay-title="切换列宽预设" { switch-preset-column-width; }
+          Mod+O hotkey-overlay-title="窗口预览" repeat=false { toggle-overview; }
+          Mod+G hotkey-overlay-title="窗口预览" repeat=false { toggle-overview; }
+          Mod+BracketLeft hotkey-overlay-title="窗口靠左侧" repeat=false { consume-or-expel-window-left; }
+          Mod+BracketRight hotkey-overlay-title="窗口靠右侧" repeat=false { consume-or-expel-window-right; }
+
+          // -------- 系统操作 --------
+          Mod+Shift+E hotkey-overlay-title="退出 Niri" { quit skip-confirmation=true; }
+
+          // -------- 滚轮/触摸板手势 --------
+          // 滚轮：工作区切换（带冷却时间防止误触）
+          Mod+Shift+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
+          Mod+Shift+WheelScrollUp cooldown-ms=150 { focus-workspace-up; }
+          Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-column-to-workspace-down; }
+          Mod+Ctrl+WheelScrollUp cooldown-ms=150 { move-column-to-workspace-up; }
+
+          // 滚轮：列焦点/移动
+          Mod+WheelScrollRight { focus-column-right; }
+          Mod+WheelScrollLeft { focus-column-left; }
+          Mod+Ctrl+WheelScrollRight { move-column-right; }
+          Mod+Ctrl+WheelScrollLeft { move-column-left; }
+
+          // Shift + 滚轮：模拟水平滚动
+          Mod+WheelScrollDown { focus-column-right; }
+          Mod+WheelScrollUp { focus-column-left; }
+          Mod+Ctrl+Shift+WheelScrollDown { move-column-right; }
+          Mod+Ctrl+Shift+WheelScrollUp { move-column-left; }
+      }
+
+      // ================ 导入 Noctalia 颜色配置 ================
+      include "./noctalia.kdl"
+    '';
+  };
+
+  # ===========================================================================
+  # Niri Noctalia 颜色配置
+  # 从备份恢复：noctalia.kdl 定义 Niri 窗口边框/聚焦环/阴影颜色
+  # ===========================================================================
+  xdg.configFile."niri/noctalia.kdl".text = ''
+    layout {
+
+        focus-ring {
+            active-color   "#8fbcbb"
+            inactive-color "#2e3440"
+            urgent-color   "#bf616a"
+        }
+
+        border {
+            active-color   "#8fbcbb"
+            inactive-color "#2e3440"
+            urgent-color   "#bf616a"
+        }
+
+        shadow {
+            color "#00000070"
+        }
+
+        tab-indicator {
+            active-color   "#8fbcbb"
+            inactive-color "#326766"
+            urgent-color   "#bf616a"
+        }
+
+        insert-hint {
+            color "#8fbcbb80"
+        }
+    }
+
+    recent-windows {
+        highlight {
+            active-color "#8fbcbb"
+            urgent-color "#bf616a"
+        }
+    }
+  '';
+
+  # ===========================================================================
+  # Niri 辅助脚本
+  # 通过 xdg.configFile 将脚本文件部署到 ~/.config/niri/script/ 目录
+  # ===========================================================================
+
+  # --- 截图编辑脚本 ---
+  xdg.configFile."niri/script/edit-screenshot.sh" = {
+    enable = true;
+    executable = true;
+    text = ''
+      #!/run/current-system/sw/bin/bash
+
+      # 声明一个变量，至是根据wl-paste输出的当前剪贴板的数据计算出的哈希值
+      CLIPNOM = $(wl-paste | sha1sum)
+
+      # 启动niri截图
+      niri msg action screenshot
+
+      # 循环，不断地打印当前剪贴板数据计算哈希值，和之前的变量里的数据进行对比
+      while [ "$(wl-paste | sha1sum)" = "$CLIPNOM" ]; do
+          sleep .05
+      done
+
+      # 将新的剪贴板内容传给satty打开
+      wl-paste | satty -f -
+    '';
+  };
+}
