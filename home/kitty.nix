@@ -73,11 +73,15 @@
     };
 
     # --- 主题文件 ---
-    # Kitty 主题通过 include 指令加载
+    # Kitty 主题通过 extraConfig 的 include 指令加载
     # 主题文件路径：~/.config/kitty/current-theme.conf
     # 当前主题：Gruvbox Dark Hard
     # 注意：不使用 themeFile 选项，因为 kitty-themes 包中可能不包含所需主题文件
-    # 改为通过 extraConfig 的 include 指令加载
     # themeFile = "gruvbox_dark_hard";
+
+    # --- 额外配置（include 等非 key=value 指令） ---
+    extraConfig = ''
+      include current-theme.conf
+    '';
   };
 }

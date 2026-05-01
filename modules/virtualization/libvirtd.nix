@@ -64,10 +64,10 @@
   ];
 
   # --- 5. 内核模块 ---
-  # 当前系统为 Intel CPU，只加载 kvm-intel（避免 kvm-amd 加载失败的内核日志告警）
-  # 如果换用 AMD CPU，将 "kvm-intel" 改为 "kvm-amd"
+  # 仅添加虚拟化相关的额外内核模块
+  # 注意：kvm-intel/amd 已在 hardware-configuration.nix 中自动加载，
+  # 此处不重复添加以避免告警。如果换用 AMD CPU，需修改 hardware-configuration.nix 中的对应配置。
   boot.kernelModules = [
-    "kvm-intel"   # Intel CPU 虚拟化
     "vfio-pci"    # PCI 直通
   ];
 

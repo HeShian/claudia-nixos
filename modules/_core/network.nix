@@ -7,7 +7,7 @@
 
 {
   # --- 1. 主机名 ---
-  networking.hostName = "nixos";
+  networking.hostName = "westwood";
 
   # --- 2. 网络管理 ---
   # 使用 NetworkManager 管理网络连接（支持 GUI 配置）

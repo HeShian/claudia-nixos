@@ -49,10 +49,6 @@
     !include /etc/nix/github-access-tokens
   '';
 
-  # ===========================================================================
-  # 环境变量（统一在此文件管理，避免分散定义）
-  # ===========================================================================
-
   # 全局环境变量（对所有用户生效）
   environment.variables = {
     NIXPKGS_ALLOW_UNFREE = "1";  # 允许 unfree 软件包
@@ -71,6 +67,7 @@
   nix.gc = {
     automatic = true;                     # 自动运行
     dates = "weekly";                     # 每周清理一次
-    options = "--delete-older-than 7d";   # 删除 7 天前的旧版本
+    options = "--delete-older-than 14d";  # 删除 14 天前的旧版本
   };
+
 }

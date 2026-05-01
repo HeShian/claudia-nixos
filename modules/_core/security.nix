@@ -34,6 +34,9 @@
   # 启用 OpenSSH 服务，允许远程连接
   services.openssh.enable = true;
 
+  # 放行 SSH 端口（防火墙默认开启时需要）
+  networking.firewall.allowedTCPPorts = [ 22 ];
+
   # --- 5. Nix 可执行文件支持 ---
   # 允许运行未打包在 Nix 商店中的可执行文件（如 AppImage）
   programs.nix-ld.enable = true;

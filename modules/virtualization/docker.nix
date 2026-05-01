@@ -19,10 +19,7 @@
     # };
   };
 
-  # --- 2. 禁用 Podman（与 Docker 冲突） ---
-  virtualisation.podman.enable = false;
-
-  # --- 3. Docker 管理工具 ---
+  # --- 2. Docker 管理工具 ---
   environment.systemPackages = with pkgs; [
     lazydocker    # Docker TUI 管理工具（终端图形界面）
   ];
