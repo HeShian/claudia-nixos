@@ -90,7 +90,6 @@
       "application/xhtml+xml" = "firefox.desktop";
       "application/x-extension-xhtml" = "firefox.desktop";
       "application/x-extension-xht" = "firefox.desktop";
-      "x-scheme-handler/ccswitch" = "cc-switch-handler.desktop";
       "x-scheme-handler/terminal" = "kitty.desktop";
     };
   };
