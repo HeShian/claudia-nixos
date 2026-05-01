@@ -1,0 +1,15 @@
+# Nix build artifacts
+result
+result-*
+
+# Editor temp files
+*~
+*.swp
+*.swo
+.DS_Store
+
+# Secrets (do NOT commit tokens or keys)
+*.secret
+*secret*
+*token*
+credentials
