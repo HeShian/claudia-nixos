@@ -299,6 +299,25 @@ in
         Hidden=false
       '';
     };
+
+    # =========================================================================
+    # XSettings 守护进程配置（XWayland 应用主题）
+    # =========================================================================
+    "xsettingsd/xsettingsd.conf" = {
+      force = true;
+      text = ''
+        Net/ThemeName "Dracula"
+        Net/IconThemeName "Dracula"
+        Gtk/CursorThemeName "Dracula-cursors"
+        Gtk/FontName "Adwaita Sans 11"
+        Net/EnableEventSounds 1
+        EnableInputFeedbackSounds 0
+        Xft/Antialias 1
+        Xft/Hinting 1
+        Xft/HintStyle "hintslight"
+        Xft/RGBA "rgb"
+      '';
+    };
   };
 
   # ===========================================================================

@@ -80,6 +80,16 @@ This repository contains my personal NixOS system configuration, managed entirel
 
 **Niri + Fcitx5 startup timing** — Fcitx5 relies on Niri's `zwp_input_method_v2` Wayland protocol to serve terminal emulators (kitty/alacritty) via `zwp_text_input_v3`. Starting fcitx5 too early (before Niri's protocol stack initializes) causes silent registration failure. The solution: disable the systemd XDG autostart (which fires at `graphical-session.target`, before Niri is ready) and use Niri's `spawn-at-startup` with a 3-second sleep to ensure the Wayland socket is available. Fcitx5 is also configured with `DISPLAY=:0` and `XMODIFIERS=@im=fcitx` for XWayland fallback.
 
+**Dracula theme protection** — Caelestia Shell changes the global GTK theme (via dconf/gsettings) to its own `adw-gtk3-dark` when switching wallpapers or color schemes, overriding the Dracula dark theme. The fix uses two layers: (1) `GTK_THEME=Dracula` environment variable in Hyprland, which takes higher priority than dconf; (2) `dconf.settings` in `home/theming.nix` to lock `color-scheme`, `gtk-theme`, and `icon-theme` to Dracula values. Additionally, `fcitx5`'s `UseAccentColor` is set to `False` so the input method theme (Nord-Dark) stays consistent regardless of system accent color changes.
+
+### Known Limitations
+
+| Issue | Status | Workaround |
+|---|---|---|
+| Fuzzel launcher can't use IME | Upstream — doesn't support `zwp_text_input_v3` | Use terminal + clipboard, or `tofi`/`anyrun` |
+| Caelestia launcher can't input Chinese | Upstream — QuickShell doesn't render `QInputMethodEvent` preedit text | Use terminal + clipboard |
+| Caelestia overrides GTK theme on wallpaper change | Mitigated by `GTK_THEME=Dracula` env lock | — |
+
 ### How to Reproduce
 
 > ⚠️ **WARNING**: This configuration is tailored to my specific hardware. Review and adjust before deploying!
@@ -137,7 +147,33 @@ sudo nixos-rebuild switch --flake /etc/nixos#westwood
 sudo reboot
 ```
 
-After reboot, log in as user `claudia` via **Ly** (TUI display manager) — choose Niri or Hyprland from the session menu. Set your password with `passwd` after first login.
+After reboot, log in as user `claudia` via **Ly** (TUI display manager) — choose Niri or Hyprland from the session menu.
+
+#### 7. Post-Install Setup
+
+Set user password and configure Git:
+
+```bash
+passwd
+git config --global user.name "Your Name"
+git config --global user.email "your@email.com"
+```
+
+Generate GitHub SSH key (for private flake inputs):
+
+```bash
+ssh-keygen -t ed25519 -C "your@email.com"
+cat ~/.ssh/id_ed25519.pub  # add to GitHub
+```
+
+#### 8. Verify
+
+| Component | Test |
+|---|---|
+| Chinese input | Open kitty (`Mod+Return`), press `Ctrl+Space` to toggle IM |
+| Bluetooth | Open Caelestia control panel (`Mod+Comma`) → Bluetooth |
+| Screenshot | `Print` for region, `Ctrl+Print` for full-screen |
+| Launcher | `Mod+D` (Caelestia) or `Mod+Z` (Fuzzel, Hyprland only) |
 
 ### Making It Your Own
 
@@ -146,6 +182,7 @@ After reboot, log in as user `claudia` via **Ly** (TUI display manager) — choo
 3. **Machine name**: Rename `westwood` in `flake.nix` → `nixosConfigurations.<your-name>`
 4. **Theme**: Modify `home/theming.nix` and `modules/desktop/theming.nix`
 5. **Packages**: Add/remove from respective module files
+6. **Keybinds**: Edit `home/niri.nix` or `home/hyprland.nix` for WM shortcuts
 
 ### Flake Inputs
 
@@ -245,6 +282,16 @@ sudo nixos-rebuild switch --flake /etc/nixos#westwood
 
 **Niri + Fcitx5 启动时序** — Fcitx5 依赖 Niri 的 `zwp_input_method_v2` Wayland 协议为终端模拟器（kitty/alacritty）提供 `zwp_text_input_v3` 输入法服务。过早启动 fcitx5（在 Niri 协议栈初始化之前）会导致静默注册失败。解决方案：禁用 systemd XDG 自动启动（在 `graphical-session.target` 时触发，早于 Niri 就绪），改用 Niri 的 `spawn-at-startup` 延迟 3 秒启动，确保 Wayland socket 可用。同时配置 `DISPLAY=:0` 和 `XMODIFIERS=@im=fcitx` 作为 XWayland 后备。
 
+**Dracula 主题保护** — Caelestia Shell 切换壁纸或配色时会通过 dconf/gsettings 把全局 GTK 主题改为自己的 `adw-gtk3-dark`，覆盖 Dracula 暗色主题。修复分两层：(1) Hyprland 环境变量 `GTK_THEME=Dracula`，优先级高于 dconf；(2) `home/theming.nix` 中的 `dconf.settings` 锁定 `color-scheme`、`gtk-theme`、`icon-theme` 为 Dracula 值。此外，fcitx5 的 `UseAccentColor` 设为 `False`，确保输入法 Nord-Dark 主题不受系统 accent 颜色影响。
+
+### 已知限制
+
+| 问题 | 状态 | 替代方案 |
+|---|---|---|
+| Fuzzel 启动器无法使用输入法 | 上游 — 不支持 `zwp_text_input_v3` | 终端输入后复制粘贴，或使用 `tofi`/`anyrun` |
+| Caelestia 启动器无法输入中文 | 上游 — QuickShell 不渲染 `QInputMethodEvent` 预编辑文本 | 终端输入后复制粘贴 |
+| Caelestia 切换壁纸时覆盖 GTK 主题 | 已通过 `GTK_THEME=Dracula` 环境变量锁定缓解 | — |
+
 ### 复现方法
 
 > ⚠️ **警告**：此配置针对我的特定硬件定制。部署前请仔细审查和修改！
@@ -302,7 +349,33 @@ sudo nixos-rebuild switch --flake /etc/nixos#westwood
 sudo reboot
 ```
 
-重启后通过 **Ly**（TUI 登录管理器）以用户 `claudia` 登录，在会话菜单中选择 Niri 或 Hyprland。首次登录后通过 `passwd` 设置密码。
+重启后通过 **Ly**（TUI 登录管理器）以用户 `claudia` 登录，在会话菜单中选择 Niri 或 Hyprland。
+
+#### 7. 首次设置
+
+设置用户密码和 Git 配置：
+
+```bash
+passwd
+git config --global user.name "你的名字"
+git config --global user.email "your@email.com"
+```
+
+生成 GitHub SSH 密钥（用于私有 flake 输入）：
+
+```bash
+ssh-keygen -t ed25519 -C "your@email.com"
+cat ~/.ssh/id_ed25519.pub  # 添加到 GitHub
+```
+
+#### 8. 验证
+
+| 组件 | 测试方法 |
+|---|---|
+| 中文输入 | 打开 kitty (`Mod+Return`)，按 `Ctrl+Space` 切换输入法 |
+| 蓝牙 | 打开 Caelestia 控制面板 (`Mod+Comma`) → 蓝牙 |
+| 截图 | `Print` 区域截图，`Ctrl+Print` 全屏截图 |
+| 启动器 | `Mod+D`（Caelestia）或 `Mod+Z`（Fuzzel，仅 Hyprland） |
 
 ### 个性化定制
 
@@ -311,6 +384,7 @@ sudo reboot
 3. **机器名**：将 `flake.nix` 中 `westwood` 改为 `nixosConfigurations.<你的名称>`
 4. **主题**：修改 `home/theming.nix` 和 `modules/desktop/theming.nix`
 5. **软件包**：在各模块文件中增减
+6. **快捷键**：编辑 `home/niri.nix` 或 `home/hyprland.nix` 中的快捷键绑定
 
 ### Flake 依赖
 
