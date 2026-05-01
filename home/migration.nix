@@ -57,6 +57,42 @@ let
     }}
     PLUGINS_EOF
   '';
+
+  # =========================================================================
+  # Hyprland Noctalia 颜色配置（noctalia-shell 模板管线在运行时生成的
+  # noctalia-colors.conf 的默认版本）。颜色值与 colors.json 保持一致。
+  # noctalia-shell 首次运行时会用自己的调色板覆盖此文件。
+  # =========================================================================
+  noctaliaHyprColorsDefaults = pkgs.runCommand "noctalia-hypr-colors" {} ''
+    mkdir -p $out
+    cat > $out/noctalia-colors.conf << 'EOF'
+    $primary = rgb(5ed4fd)
+    $surface = rgb(111415)
+    $secondary = rgb(b3cad5)
+    $error = rgb(ffb4ab)
+    $tertiary = rgb(c4c3eb)
+    $surface_lowest = rgb(0a0d0f)
+
+    general {
+        col.active_border = $primary
+        col.inactive_border = $surface
+    }
+
+    group {
+        col.border_active = $secondary
+        col.border_inactive = $surface
+        col.border_locked_active = $error
+        col.border_locked_inactive = $surface
+
+        groupbar {
+            col.active = $secondary
+            col.inactive = $surface
+            col.locked_active = $error
+            col.locked_inactive = $surface
+        }
+    }
+    EOF
+  '';
 in
 {
   # ===========================================================================
@@ -244,6 +280,28 @@ in
         chmod 644 "$target"
       fi
     done
+  '';
+
+  # ===========================================================================
+  # Hyprland Noctalia 颜色配置激活脚本
+  # 将默认的 noctalia-colors.conf 从 nix store 复制到
+  # ~/.config/hypr/noctalia/ 作为真实文件（遵循与 copyNoctaliaDefaults
+  # 相同的模式：仅在目标不存在时复制，允许 noctalia-shell 后续修改）
+  # ===========================================================================
+  home.activation.copyNoctaliaHyprColors = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    HYPR_NOCTALIA_DIR="$HOME/.config/hypr/noctalia"
+    mkdir -p "$HYPR_NOCTALIA_DIR"
+
+    target="$HYPR_NOCTALIA_DIR/noctalia-colors.conf"
+    # 删除旧的只读符号链接（指向 nix store，cp 无法覆写）
+    if [ -L "$target" ]; then
+      rm -f "$target"
+    fi
+    # 如果目标不存在 → 复制默认值（noctalia-shell 之后可以覆写）
+    if [ ! -f "$target" ]; then
+      cp ${noctaliaHyprColorsDefaults}/noctalia-colors.conf "$target"
+      chmod 644 "$target"
+    fi
   '';
 
   # ===========================================================================

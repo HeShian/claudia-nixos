@@ -42,14 +42,14 @@ This repository contains my personal NixOS system configuration, managed entirel
     ├── alacritty.nix / kitty.nix      # Terminal emulators
     ├── git.nix / vim.nix              # Development tools
     ├── theming.nix                     # GTK/Kvantum (Dracula dark)
-    └── migration.nix                  # Legacy configs migrated to Nix
+    └── migration.nix                  # Legacy configs + Noctalia theme generator
 ```
 
 ### Key Features
 
 | Area | What's Configured |
 |---|---|
-| **Desktop** | GNOME 49 + Hyprland + Niri — triple WM, switch at login |
+| **Desktop** | GNOME 49 + Hyprland 0.54 + Niri — triple WM, switch at login |
 | **Shell** | Noctalia Shell (QuickShell-based desktop widgets) |
 | **GPU** | NVIDIA proprietary driver with modesetting + VA-API |
 | **Audio** | PipeWire with WirePlumber, ALSA/PulseAudio compat |
@@ -63,6 +63,12 @@ This repository contains my personal NixOS system configuration, managed entirel
 | **Gaming** | Steam + Lutris + Heroic + Wine/Bottles |
 | **VPN** | v2rayA + Clash Verge Rev |
 | **Nix Cache** | Tsinghua + USTC mirrors, weekly auto GC |
+
+### Design Patterns
+
+**`home.activation` for writable configs** — Some desktop tools (Noctalia, Qt theming) need to *write* to their config files at runtime. Standard `xdg.configFile` creates read-only symlinks to the Nix store, which silently break runtime writes. The solution used here: `home.activation` scripts that copy defaults from the Nix store as **real files** — but only when the target doesn't already exist. This guarantees a working default while allowing the application to update its own config later.
+
+**Hyprland + Noctalia color pipeline** — Noctalia-shell generates `noctalia-colors.conf` at `~/.config/hypr/noctalia/` containing Hyprland color variables (`$primary`, `$surface`, etc.) via its template pipeline. The file doesn't exist until Noctalia runs. To prevent Hyprland startup failures, `home.activation.copyNoctaliaHyprColors` pre-seeds a default file using the same color palette defined in `colors.json`. Once Noctalia-shell starts, it replaces the file with its own dynamic palette (e.g., generated from wallpaper).
 
 ### How to Reproduce
 
@@ -191,14 +197,14 @@ sudo nixos-rebuild switch --flake /etc/nixos#westwood
     ├── alacritty.nix / kitty.nix      # 终端模拟器
     ├── git.nix / vim.nix              # 开发工具
     ├── theming.nix                     # GTK/Kvantum(Dracula 暗色主题)
-    └── migration.nix                  # 从 ~/.config/ 迁入的遗留配置
+    └── migration.nix                  # 遗留配置 + Noctalia 主题生成器
 ```
 
 ### 核心特性
 
 | 领域 | 配置内容 |
 |---|---|
-| **桌面** | GNOME 49 + Hyprland + Niri — 三种 WM，登录时切换 |
+| **桌面** | GNOME 49 + Hyprland 0.54 + Niri — 三种 WM，登录时切换 |
 | **Shell** | Noctalia Shell（基于 QuickShell 的桌面组件） |
 | **显卡** | NVIDIA 闭源驱动 + modesetting + VA-API 硬件解码 |
 | **音频** | PipeWire + WirePlumber，兼容 ALSA/PulseAudio |
@@ -212,6 +218,12 @@ sudo nixos-rebuild switch --flake /etc/nixos#westwood
 | **游戏** | Steam + Lutris + Heroic + Wine/Bottles |
 | **代理** | v2rayA + Clash Verge Rev |
 | **Nix 源** | 清华大学 + 中科大镜像，每周自动垃圾回收 |
+
+### 设计模式
+
+**`home.activation` 处理可写配置** — 某些桌面工具（Noctalia、Qt 主题）需要在运行时*写入*其配置文件。标准的 `xdg.configFile` 会创建指向 Nix store 的只读符号链接，导致运行时写入静默失败。本仓库的解决方案：使用 `home.activation` 脚本将默认配置从 Nix store 复制为**真实文件**——但仅在目标文件不存在时执行。这既保证了开箱即用的默认配置，又允许应用程序后续更新自己的配置。
+
+**Hyprland + Noctalia 颜色管道** — Noctalia-shell 通过其模板管道在 `~/.config/hypr/noctalia/` 生成 `noctalia-colors.conf`，包含 Hyprland 颜色变量（`$primary`、`$surface` 等）。该文件在 Noctalia 运行前不存在。为防止 Hyprland 启动失败，`home.activation.copyNoctaliaHyprColors` 使用 `colors.json` 中相同的调色板预置默认文件。Noctalia-shell 启动后会用其动态调色板（例如从壁纸生成）替换该文件。
 
 ### 复现方法
 
@@ -301,4 +313,3 @@ nix flake update --flake /etc/nixos
 # 重新构建
 sudo nixos-rebuild switch --flake /etc/nixos#westwood
 ```
->>>>>>> 07a660b (feat: add application modules, home-manager, and README)

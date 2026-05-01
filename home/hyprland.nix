@@ -205,7 +205,8 @@
       bindl = , XF86AudioPlay, exec, playerctl play-pause
       bindl = , XF86AudioPrev, exec, playerctl previous
 
-      # 导入 Noctalia 颜色配置
+      # 导入 Noctalia 颜色配置（由 home.activation 自动初始化，
+      # noctalia-shell 运行后可动态更新）
       source = ~/.config/hypr/noctalia/noctalia-colors.conf
     '';
   };
