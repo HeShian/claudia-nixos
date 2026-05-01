@@ -38,7 +38,7 @@
       #################
       ### 自动启动  ###
       #################
-      exec-once = caelestia-shell
+      exec-once = QT_IM_MODULE="" QT_IM_MODULES="wayland" caelestia-shell
       exec-once = fcitx5 -d
 
       #############################
