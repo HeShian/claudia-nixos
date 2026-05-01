@@ -25,22 +25,24 @@ This repository contains my personal NixOS system configuration, managed entirel
 ├── hardware-configuration.nix # Auto-generated — disk/CPU/hardware info
 ├── modules/                  # System-level modules (11 categories)
 │   ├── _core/               # Boot, networking, Nix settings, security
-│   ├── desktop/             # GNOME + Hyprland + Niri + GDM + theming
-│   ├── hardware/            # NVIDIA GPU, PipeWire audio, printing
+│   ├── desktop/             # Hyprland + Niri + Ly DM + theming + shells
+│   │   └── shells/          # Caelestia (Hyprland) + Noctalia (Niri)
+│   ├── hardware/            # NVIDIA GPU, PipeWire audio, Bluetooth, printing
 │   ├── locale/              # Chinese locale, Fcitx5 IME, fonts
-│   ├── develop/             # Languages, build tools, editors (VS Code / NixVim)
+│   ├── develop/             # Languages, build tools, AI tools, editors
 │   ├── gaming/              # Steam, Lutris, Heroic, Wine/Bottles
 │   ├── virtualization/      # Docker, KVM/QEMU/libvirtd, Incus
 │   ├── network/             # VPN/proxy (v2rayA + Clash), SSH
-│   ├── multimedia/          # OBS, Flatpak, clipboard tools
+│   ├── multimedia/          # OBS, Flatpak, clipboard, screenshots
 │   ├── communication/       # Discord, Telegram
 │   └── applications/        # Browsers, terminals, productivity tools
 └── home/                    # User-level Home Manager configs
-    ├── default.nix          # Entry — packages, env vars, Nautilus
-    ├── bash.nix / zsh.nix / fish.nix  # Shell configs (Starship prompt)
+    ├── default.nix          # Entry — packages, env vars, MIME, autostart overrides
+    ├── bash.nix / zsh.nix   # Shell configs (Starship prompt)
     ├── hyprland.nix / niri.nix        # WM keybinds, layout, theming
     ├── alacritty.nix / kitty.nix      # Terminal emulators
     ├── git.nix / vim.nix              # Development tools
+    ├── cava.nix / clipse.nix / satty.nix  # Audio viz, clipboard, screenshots
     ├── theming.nix                     # GTK/Kvantum (Dracula dark)
     └── migration.nix                  # Legacy configs + Noctalia theme generator
 ```
@@ -49,19 +51,25 @@ This repository contains my personal NixOS system configuration, managed entirel
 
 | Area | What's Configured |
 |---|---|
-| **Desktop** | GNOME 49 + Hyprland 0.54 + Niri — triple WM, switch at login |
-| **Shell** | Noctalia Shell (QuickShell-based desktop widgets) |
+| **Desktop** | Hyprland + Niri — dual WM, switch at login via Ly DM |
+| **Shell** | Noctalia Shell (Niri) + Caelestia Shell (Hyprland) |
 | **GPU** | NVIDIA proprietary driver with modesetting + VA-API |
-| **Audio** | PipeWire with WirePlumber, ALSA/PulseAudio compat |
-| **Input** | Fcitx5 (Pinyin + Rime) with Nord theme |
+| **Audio** | PipeWire with WirePlumber, Bluetooth codecs (LDAC/AAC/aptX) |
+| **Bluetooth** | BlueZ + Blueman, handled by Caelestia Shell pairing UI |
+| **Input** | Fcitx5 (Pinyin + Rime) with Nord theme, Wayland text-input-v3 |
 | **Fonts** | Cascadia Code, JetBrains Mono Nerd Font, Noto CJK |
 | **Theme** | Dracula dark — GTK 2/3/4 + Kvantum (Qt5/Qt6) |
-| **Terminal** | Kitty (primary) + Alacritty, both with fastfetch on launch |
-| **Shell** | ZSH + Bash + Fish, all with Starship prompt |
-| **Editor** | Vim + Neovim (NixVim), clipboard integrated via wl-clipboard |
+| **Terminal** | Kitty (primary) + Alacritty |
+| **Shell** | ZSH + Bash, both with Starship prompt |
+| **Editor** | Neovim (NixVim), clipboard integrated via wl-clipboard |
+| **File Manager** | Thunar (lightweight, fast) |
+| **Launcher** | Fuzzel (Wayland-native, themed) |
+| **Screenshots** | grim + slurp + satty — region, window, full-screen, instant edit |
+| **Clipboard** | Clipse (Wayland-native clipboard manager) |
 | **VM** | Docker + KVM/QEMU (libvirtd) + Incus |
 | **Gaming** | Steam + Lutris + Heroic + Wine/Bottles |
 | **VPN** | v2rayA + Clash Verge Rev |
+| **AI Tools** | OpenCode AI coding assistant |
 | **Nix Cache** | Tsinghua + USTC mirrors, weekly auto GC |
 
 ### Design Patterns
@@ -69,6 +77,8 @@ This repository contains my personal NixOS system configuration, managed entirel
 **`home.activation` for writable configs** — Some desktop tools (Noctalia, Qt theming) need to *write* to their config files at runtime. Standard `xdg.configFile` creates read-only symlinks to the Nix store, which silently break runtime writes. The solution used here: `home.activation` scripts that copy defaults from the Nix store as **real files** — but only when the target doesn't already exist. This guarantees a working default while allowing the application to update its own config later.
 
 **Hyprland + Noctalia color pipeline** — Noctalia-shell generates `noctalia-colors.conf` at `~/.config/hypr/noctalia/` containing Hyprland color variables (`$primary`, `$surface`, etc.) via its template pipeline. The file doesn't exist until Noctalia runs. To prevent Hyprland startup failures, `home.activation.copyNoctaliaHyprColors` pre-seeds a default file using the same color palette defined in `colors.json`. Once Noctalia-shell starts, it replaces the file with its own dynamic palette (e.g., generated from wallpaper).
+
+**Niri + Fcitx5 startup timing** — Fcitx5 relies on Niri's `zwp_input_method_v2` Wayland protocol to serve terminal emulators (kitty/alacritty) via `zwp_text_input_v3`. Starting fcitx5 too early (before Niri's protocol stack initializes) causes silent registration failure. The solution: disable the systemd XDG autostart (which fires at `graphical-session.target`, before Niri is ready) and use Niri's `spawn-at-startup` with a 3-second sleep to ensure the Wayland socket is available. Fcitx5 is also configured with `DISPLAY=:0` and `XMODIFIERS=@im=fcitx` for XWayland fallback.
 
 ### How to Reproduce
 
@@ -127,7 +137,7 @@ sudo nixos-rebuild switch --flake /etc/nixos#westwood
 sudo reboot
 ```
 
-After reboot, log in as user `claudia` (or change the username in `modules/_core/security.nix` before building). The default password should be set via `passwd` after first login.
+After reboot, log in as user `claudia` via **Ly** (TUI display manager) — choose Niri or Hyprland from the session menu. Set your password with `passwd` after first login.
 
 ### Making It Your Own
 
@@ -143,9 +153,9 @@ After reboot, log in as user `claudia` (or change the username in `modules/_core
 |---|---|
 | `nixpkgs/nixos-unstable` | Rolling-release package collection |
 | `nix-community/home-manager` | User-level package and dotfile management |
-| `outfoxxed/quickshell` | Desktop widget framework (foundation for DMS/Noctalia) |
-| `AvengeMedia/DankMaterialShell` | Material Design desktop shell |
-| `noctalia-dev/noctalia-shell` | Noctalia desktop shell |
+| `outfoxxed/quickshell` | Desktop widget framework (foundation for Noctalia/Caelestia) |
+| `noctalia-dev/noctalia-shell` | Noctalia desktop shell (Niri default) |
+| `caelestia-dots/shell` | Caelestia desktop shell (Hyprland default) |
 | `nix-community/nixvim` | Neovim configuration framework |
 | `nix-community/nixos-vscode-server` | VS Code remote development support |
 
@@ -180,22 +190,24 @@ sudo nixos-rebuild switch --flake /etc/nixos#westwood
 ├── hardware-configuration.nix # 自动生成 — 磁盘/CPU/硬件信息
 ├── modules/                  # 系统级模块（11 个分类）
 │   ├── _core/               # 引导、网络、Nix 设置、安全
-│   ├── desktop/             # GNOME + Hyprland + Niri + GDM + 主题
-│   ├── hardware/            # NVIDIA 驱动、PipeWire 音频、打印
+│   ├── desktop/             # Hyprland + Niri + Ly DM + 主题 + Shell
+│   │   └── shells/          # Caelestia（Hyprland）+ Noctalia（Niri）
+│   ├── hardware/            # NVIDIA 驱动、PipeWire 音频、蓝牙、打印
 │   ├── locale/              # 中文环境、Fcitx5 输入法、字体
-│   ├── develop/             # 编程语言、构建工具、编辑器(NixVim/VS Code)
+│   ├── develop/             # 编程语言、构建工具、AI 工具、编辑器
 │   ├── gaming/              # Steam、Lutris、Heroic、Wine/Bottles
 │   ├── virtualization/      # Docker、KVM/QEMU/libvirtd、Incus
 │   ├── network/             # VPN/代理(v2rayA + Clash)、SSH
-│   ├── multimedia/          # OBS、Flatpak、剪贴板工具
+│   ├── multimedia/          # OBS、Flatpak、剪贴板、截图
 │   ├── communication/       # Discord、Telegram
 │   └── applications/        # 浏览器、终端、生产力工具
 └── home/                    # 用户级 Home Manager 配置
-    ├── default.nix          # 入口 — 软件包、环境变量、Nautilus
-    ├── bash.nix / zsh.nix / fish.nix  # Shell 配置(Starship 提示符)
+    ├── default.nix          # 入口 — 软件包、环境变量、MIME、启动覆盖
+    ├── bash.nix / zsh.nix   # Shell 配置(Starship 提示符)
     ├── hyprland.nix / niri.nix        # 窗口管理器键位、布局、主题
     ├── alacritty.nix / kitty.nix      # 终端模拟器
     ├── git.nix / vim.nix              # 开发工具
+    ├── cava.nix / clipse.nix / satty.nix  # 音频可视化、剪贴板、截图
     ├── theming.nix                     # GTK/Kvantum(Dracula 暗色主题)
     └── migration.nix                  # 遗留配置 + Noctalia 主题生成器
 ```
@@ -204,19 +216,25 @@ sudo nixos-rebuild switch --flake /etc/nixos#westwood
 
 | 领域 | 配置内容 |
 |---|---|
-| **桌面** | GNOME 49 + Hyprland 0.54 + Niri — 三种 WM，登录时切换 |
-| **Shell** | Noctalia Shell（基于 QuickShell 的桌面组件） |
+| **桌面** | Hyprland + Niri — 双 WM，通过 Ly DM 登录切换 |
+| **Shell** | Noctalia Shell（Niri）+ Caelestia Shell（Hyprland） |
 | **显卡** | NVIDIA 闭源驱动 + modesetting + VA-API 硬件解码 |
-| **音频** | PipeWire + WirePlumber，兼容 ALSA/PulseAudio |
-| **输入法** | Fcitx5（拼音 + Rime 中古音），Nord 主题 |
+| **音频** | PipeWire + WirePlumber，蓝牙编解码（LDAC/AAC/aptX） |
+| **蓝牙** | BlueZ + Blueman，由 Caelestia Shell 配对界面管理 |
+| **输入法** | Fcitx5（拼音 + Rime 中古音），Nord 主题，Wayland text-input-v3 |
 | **字体** | Cascadia Code、JetBrains Mono Nerd Font、Noto CJK |
 | **主题** | Dracula 暗色 — GTK 2/3/4 + Kvantum（Qt5/Qt6） |
-| **终端** | Kitty（主力）+ Alacritty，启动时自动显示 fastfetch |
-| **Shell** | ZSH + Bash + Fish，统一使用 Starship 提示符 |
-| **编辑器** | Vim + Neovim (NixVim)，系统剪贴板集成(wl-clipboard) |
+| **终端** | Kitty（主力）+ Alacritty |
+| **Shell** | ZSH + Bash，统一使用 Starship 提示符 |
+| **编辑器** | Neovim (NixVim)，系统剪贴板集成(wl-clipboard) |
+| **文件管理** | Thunar（轻量快速） |
+| **启动器** | Fuzzel（Wayland 原生，主题适配） |
+| **截图** | grim + slurp + satty — 区域/窗口/全屏，即时编辑 |
+| **剪贴板** | Clipse（Wayland 原生剪贴板管理器） |
 | **虚拟化** | Docker + KVM/QEMU (libvirtd) + Incus |
 | **游戏** | Steam + Lutris + Heroic + Wine/Bottles |
 | **代理** | v2rayA + Clash Verge Rev |
+| **AI 工具** | OpenCode AI 编码助手 |
 | **Nix 源** | 清华大学 + 中科大镜像，每周自动垃圾回收 |
 
 ### 设计模式
@@ -224,6 +242,8 @@ sudo nixos-rebuild switch --flake /etc/nixos#westwood
 **`home.activation` 处理可写配置** — 某些桌面工具（Noctalia、Qt 主题）需要在运行时*写入*其配置文件。标准的 `xdg.configFile` 会创建指向 Nix store 的只读符号链接，导致运行时写入静默失败。本仓库的解决方案：使用 `home.activation` 脚本将默认配置从 Nix store 复制为**真实文件**——但仅在目标文件不存在时执行。这既保证了开箱即用的默认配置，又允许应用程序后续更新自己的配置。
 
 **Hyprland + Noctalia 颜色管道** — Noctalia-shell 通过其模板管道在 `~/.config/hypr/noctalia/` 生成 `noctalia-colors.conf`，包含 Hyprland 颜色变量（`$primary`、`$surface` 等）。该文件在 Noctalia 运行前不存在。为防止 Hyprland 启动失败，`home.activation.copyNoctaliaHyprColors` 使用 `colors.json` 中相同的调色板预置默认文件。Noctalia-shell 启动后会用其动态调色板（例如从壁纸生成）替换该文件。
+
+**Niri + Fcitx5 启动时序** — Fcitx5 依赖 Niri 的 `zwp_input_method_v2` Wayland 协议为终端模拟器（kitty/alacritty）提供 `zwp_text_input_v3` 输入法服务。过早启动 fcitx5（在 Niri 协议栈初始化之前）会导致静默注册失败。解决方案：禁用 systemd XDG 自动启动（在 `graphical-session.target` 时触发，早于 Niri 就绪），改用 Niri 的 `spawn-at-startup` 延迟 3 秒启动，确保 Wayland socket 可用。同时配置 `DISPLAY=:0` 和 `XMODIFIERS=@im=fcitx` 作为 XWayland 后备。
 
 ### 复现方法
 
@@ -282,7 +302,7 @@ sudo nixos-rebuild switch --flake /etc/nixos#westwood
 sudo reboot
 ```
 
-重启后以用户 `claudia` 登录（如需修改用户名，请在构建前编辑 `modules/_core/security.nix`）。首次登录后通过 `passwd` 设置密码。
+重启后通过 **Ly**（TUI 登录管理器）以用户 `claudia` 登录，在会话菜单中选择 Niri 或 Hyprland。首次登录后通过 `passwd` 设置密码。
 
 ### 个性化定制
 
@@ -298,9 +318,9 @@ sudo reboot
 |---|---|
 | `nixpkgs/nixos-unstable` | 滚动更新的软件包集合 |
 | `nix-community/home-manager` | 用户级软件包和配置文件管理 |
-| `outfoxxed/quickshell` | 桌面组件框架（DMS/Noctalia 的基础） |
-| `AvengeMedia/DankMaterialShell` | Material Design 风格桌面 Shell |
-| `noctalia-dev/noctalia-shell` | Noctalia 桌面 Shell |
+| `outfoxxed/quickshell` | 桌面组件框架（Noctalia/Caelestia 的基础） |
+| `noctalia-dev/noctalia-shell` | Noctalia 桌面 Shell（Niri 默认） |
+| `caelestia-dots/shell` | Caelestia 桌面 Shell（Hyprland 默认） |
 | `nix-community/nixvim` | Neovim 配置框架 |
 | `nix-community/nixos-vscode-server` | VS Code 远程开发支持 |
 
