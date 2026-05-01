@@ -51,7 +51,9 @@
 
       # 配置工具
       qt6Packages.fcitx5-configtool       # GUI 配置工具
-      fcitx5-gtk                          # GTK 应用支持
+      fcitx5-gtk                          # GTK 应用 IM 支持
+      qt6Packages.fcitx5-qt               # Qt6 应用 IM 支持（微信/QQ 等需要）
+      libsForQt5.fcitx5-qt                # Qt5 应用 IM 支持
 
       # 外观
       fcitx5-nord                         # Nord 主题
@@ -62,5 +64,14 @@
 
     # Wayland 前端支持
     fcitx5.waylandFrontend = true;
+  };
+
+  # --- 4. 全局输入法环境变量 ---
+  # 确保所有应用（包括 Electron/AppImage 封装的微信、QQ）能使用 Fcitx5
+  environment.variables = {
+    GTK_IM_MODULE = "fcitx";
+    QT_IM_MODULE = "fcitx";
+    SDL_IM_MODULE = "fcitx";
+    GLFW_IM_MODULE = "ibus";  # GLFW 使用 ibus 协议兼容 Fcitx5
   };
 }

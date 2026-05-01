@@ -10,5 +10,7 @@
   environment.systemPackages = with pkgs; [
     discord           # Discord 语音/文字聊天
     telegram-desktop  # Telegram 桌面客户端
+    wechat            # 微信（原生 Linux 版，替代 Flatpak）
+    qq                # QQ（原生 Linux 版，替代 Flatpak）
   ];
 }
