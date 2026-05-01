@@ -56,7 +56,7 @@
       libsForQt5.fcitx5-qt                # Qt5 应用 IM 支持
 
       # 外观
-      fcitx5-nord                         # Nord 主题
+      fcitx5-nord                         # Nord 主题（Dracula 暗色风格）
 
       # Lua 扩展支持
       fcitx5-lua

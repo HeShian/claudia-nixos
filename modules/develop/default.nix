@@ -12,5 +12,6 @@
     ./version-control.nix   # 版本控制
     ./editors/vscode.nix    # VS Code 编辑器
     ./editors/nixvim.nix    # Neovim 编辑器（NixVim）
+    ./ai-tools.nix          # AI 编程工具（Claude Code + CC-Switch）
   ];
 }

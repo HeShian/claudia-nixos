@@ -78,7 +78,9 @@
 
       // ================ 启动时自动运行的程序 ================
       spawn-at-startup  "noctalia-shell"
-      spawn-at-startup "clipse --listen"
+      spawn-at-startup "sh" "-c" "sleep 3 && fcitx5 -d"
+      spawn-at-startup "blueman-applet"
+      spawn-at-startup "clipse" "--listen"
 
       // ================ 环境变量设置 ================
       environment {
@@ -91,8 +93,18 @@
           TERM "kitty"
           TERMINAL "kitty"
 
+          // 区域与输入法环境变量（Fcitx5）
+          LANG "zh_CN.UTF-8"
+          GTK_IM_MODULE "fcitx"
+          QT_IM_MODULE "fcitx"
+          SDL_IM_MODULE "fcitx"
+          GLFW_IM_MODULE "ibus"
+          XMODIFIERS "@im=fcitx"
+          DISPLAY ":0"
+
           // 其他重要设置
-          QT_QPA_PLATFORMTHEME "qt6ct" // Qt主题引擎
+          // QT_QPA_PLATFORMTHEME 已在 modules/desktop/theming.nix 移除
+          // QT_STYLE_OVERRIDE=kvantum 已经足够处理 Qt 主题
       }
 
       // ================ 布局与外观设置 ================
@@ -194,16 +206,16 @@
           Mod+T hotkey-overlay-title="打开 (Alacritty)" { spawn "alacritty"; }
           Mod+D hotkey-overlay-title="Fuzzel" { spawn-sh "fuzzel --config ~/.config/fuzzel/themes/noctalia"; }
           Mod+B hotkey-overlay-title="firefox" { spawn "firefox"; }
-          Mod+N hotkey-overlay-title="nautilus" { spawn "nautilus"; }
+          Mod+E hotkey-overlay-title="Thunar" { spawn "thunar"; }
           Mod+Alt+A hotkey-overlay-title="区域截图" { screenshot; }
           Print hotkey-overlay-title="区域截图" { screenshot; }
           Mod+Shift+S hotkey-overlay-title="截图后编辑" { spawn  "~/.config/niri/script/edit-screenshot.sh"; }
           Ctrl+Print hotkey-overlay-title="全屏截图" { screenshot-screen; }
           Alt+Print hotkey-overlay-title="聚焦截图" { screenshot-window; }
-          Mod+F1 hotkey-overlay-title="重启中文输入法" { spawn-sh "pkill fcitx5 || fcitx5"; }
+          Mod+F1 hotkey-overlay-title="重启中文输入法" { spawn-sh "pkill fcitx5; sleep 0.5; fcitx5 -d"; }
           Mod+Alt+V hotkey-overlay-title="打开剪贴板" { spawn "kitty" "--class" "clipse" "clipse"; }
 
-          // -------- Noctalia 特有绑定 --------
+          // -------- Noctalia 特有绑定（Niri 默认 Shell）--------
           Mod+S hotkey-overlay-title="控制面板" { spawn "noctalia-shell" "ipc" "call" "controlCenter" "toggle"; }
           Mod+Comma hotkey-overlay-title="设置" { spawn "noctalia-shell" "ipc" "call" "settings" "toggle"; }
           Super+Alt+L hotkey-overlay-title="锁屏" { spawn "noctalia-shell" "ipc" "call" "lockScreen" "lock"; }

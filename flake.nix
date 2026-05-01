@@ -53,6 +53,13 @@
       url = "github:nix-community/nixos-vscode-server";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # --- Caelestia Shell：基于 QuickShell 的桌面 Shell ---
+    caelestia-shell = {
+      url = "github:caelestia-dots/shell";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.quickshell.follows = "quickshell";
+    };
   };
 
   # ===========================================================================
@@ -83,6 +90,7 @@
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
+          home-manager.backupFileExtension = "bak";  # 覆盖旧文件前自动备份
           home-manager.users.claudia = {
             imports = [ ./home/default.nix ];
           };

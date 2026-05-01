@@ -13,5 +13,8 @@
     wtype           # Wayland 键盘输入模拟
     xdotool         # X11 键盘/鼠标自动化工具
     satty           # 截图标注工具
+    grim            # Wayland 截图工具
+    slurp           # Wayland 区域选择工具
+    jq              # JSON 处理（窗口截图坐标解析）
   ];
 }

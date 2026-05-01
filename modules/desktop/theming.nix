@@ -22,6 +22,10 @@
     # === Qt 配置工具 ===
     libsForQt5.qt5ct                    # Qt5 外观配置工具
     kdePackages.qt6ct                   # Qt6 外观配置工具
+
+    # === GTK 主题可视化配置工具 ===
+    nwg-look                            # GTK 设置编辑器（Wayland 原生，适配 Hyprland）
+    lxappearance                        # GTK 主题/字体/图标切换器（经典工具）
   ];
 
   # ===========================================================================
@@ -29,8 +33,8 @@
   # ===========================================================================
   environment.sessionVariables = {
     # Qt 应用使用 Kvantum 主题引擎（Dracula 暗色效果）
+    # QT_STYLE_OVERRIDE 强制所有 Qt5/Qt6 应用使用 kvantum 作为 widget 样式
+    # 不设置 QT_QPA_PLATFORMTHEME，避免与 qt5ct/qt6ct 配置文件中的 style 冲突
     QT_STYLE_OVERRIDE = "kvantum";
-    # 使 Qt 应用在非 KDE 桌面下正确加载平台主题
-    QT_QPA_PLATFORMTHEME = "qt6ct";
   };
 }

@@ -235,6 +235,49 @@ in
     };
 
     # =========================================================================
+    # Fcitx5 主题 — Dracula 风格暗色（Nord-Dark）
+    # =========================================================================
+    "fcitx5/conf/classicui.conf" = {
+      force = true;
+      text = ''
+        # 垂直候选列表
+        Vertical Candidate List=False
+        # 使用鼠标滚轮翻页
+        WheelForPaging=True
+        # 字体
+        Font="Sans 10"
+        # 菜单字体
+        MenuFont="Sans 10"
+        # 托盘字体
+        TrayFont="Sans Bold 10"
+        # 托盘标签轮廓颜色
+        TrayOutlineColor=#000000
+        # 托盘标签文本颜色
+        TrayTextColor=#ffffff
+        # 优先使用文字图标
+        PreferTextIcon=False
+        # 在图标中显示布局名称
+        ShowLayoutNameInIcon=True
+        # 使用输入法的语言来显示文字
+        UseInputMethodLanguageToDisplayText=True
+        # 主题 — Dracula 风格暗色
+        Theme=Nord-Dark
+        # 深色主题
+        DarkTheme=Nord-Dark
+        # 跟随系统浅色/深色设置
+        UseDarkTheme=False
+        # 当被主题和桌面支持时使用系统的重点色
+        UseAccentColor=True
+        # 在 X11 上针对不同屏幕使用单独的 DPI
+        PerScreenDPI=False
+        # 固定 Wayland 的字体 DPI
+        ForceWaylandDPI=0
+        # 在 Wayland 下启用分数缩放
+        EnableFractionalScale=True
+      '';
+    };
+
+    # =========================================================================
     # Niri 辅助脚本目录（已管理 edit-screenshot.sh，此处为占位）
     # =========================================================================
 
@@ -306,7 +349,13 @@ in
 
   # ===========================================================================
   # 清理：移除 ~/.config/nix/nix.conf（GitHub Token 已移至 /etc/nix/）
+  # 使用 home.activation 删除残留的 nix.conf 文件
   # ===========================================================================
-  # home-manager 不直接删除文件，此处留空文件替代原 nix.conf
-  # 实际的 GitHub Token 现在位于 /etc/nix/github-access-tokens（由 nix-settings.nix 引用）
+  home.activation.cleanupOldNixConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    OLD_NIX_CONF="$HOME/.config/nix/nix.conf"
+    if [ -f "$OLD_NIX_CONF" ] && [ ! -L "$OLD_NIX_CONF" ]; then
+      rm -f "$OLD_NIX_CONF"
+      echo "[cleanup] 已移除旧版 $OLD_NIX_CONF"
+    fi
+  '';
 }

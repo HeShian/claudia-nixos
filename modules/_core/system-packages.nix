@@ -10,14 +10,8 @@
 {
   # --- 系统级软件包 ---
   environment.systemPackages = with pkgs; [
-    # === GNOME 扩展管理 ===
-    gnome-extension-manager     # GNOME Shell 扩展的图形化管理工具
-
     # === Wayland 工具 ===
     xwayland-satellite          # XWayland 增强工具
-
-    # === 桌面门户 ===
-    xdg-desktop-portal-gnome    # GNOME 桌面门户后端（屏幕共享、文件选择器等）
   ];
 
   # 注意：GStreamer 插件集（gst-plugins-*）已从此处移除，

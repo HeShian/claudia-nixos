@@ -32,13 +32,14 @@
       ### 程序快捷方式 ###
       ###################
       $terminal = kitty
-      $fileManager = nautilus
+      $fileManager = thunar
       $menu = fuzzel --show drun
 
       #################
       ### 自动启动  ###
       #################
-      exec-once = noctalia-shell
+      exec-once = caelestia-shell
+      exec-once = blueman-applet
       exec-once = fcitx5 -d
 
       #############################
@@ -48,6 +49,11 @@
       env = HYPRCURSOR_SIZE,24
       env = XCURSOR_THEME,Bibata-Modern-Ice
       env = HYPRCURSOR_THEME,Bibata-Modern-Ice
+      env = GTK_IM_MODULE,fcitx
+      env = QT_IM_MODULE,fcitx
+      env = SDL_IM_MODULE,fcitx
+      env = GLFW_IM_MODULE,ibus
+      env = LANG,zh_CN.UTF-8
 
       #####################
       ### 外观设置 ###
@@ -138,22 +144,44 @@
       ###################
       $mainMod = SUPER
 
-      # 启动终端和菜单
-      bind = $mainMod, Return, exec, $terminal
-      bind = $mainMod, Q, killactive,
-      bind = $mainMod, M, exit,
-      bind = $mainMod, E, exec, $fileManager
-      bind = $mainMod, V, togglefloating,
-      bind = $mainMod, D, exec, $menu
-      bind = $mainMod, P, pseudo,
-      bind = $mainMod, J, togglesplit,
-      bind = $mainMod, T, exec, alacritty
+      # ==========================================================
+      # 应用启动（与 Niri 保持一致）
+      # ==========================================================
+      bind = $mainMod, Return, exec, $terminal        # 终端 (kitty)
+      bind = $mainMod, T, exec, alacritty              # 终端 (alacritty)
+      bind = $mainMod, D, exec, $menu                  # 应用启动器 (fuzzel)
+      bind = $mainMod, E, exec, $fileManager           # 文件管理器 (nautilus)
+      bind = $mainMod, B, exec, firefox                 # 浏览器
+
+      # ==========================================================
+      # Caelestia Shell 快捷键（默认 Shell）
+      # ==========================================================
+      bind = $mainMod, S, exec, caelestia shell drawers toggle dashboard
+      bind = $mainMod, comma, exec, caelestia shell controlCenter open
+      bind = $mainMod, Z, exec, caelestia shell drawers toggle launcher
+      bind = $mainMod ALT, L, exec, caelestia shell lock lock
+
+      # ==========================================================
+      # 窗口管理
+      # ==========================================================
+      bind = $mainMod, Q, killactive,                   # 关闭窗口
+      bind = $mainMod, V, togglefloating,               # 切换浮动/平铺
+      bind = $mainMod, F, fullscreen, 1                 # 全屏
+      bind = $mainMod, P, pseudo,                       # 伪平铺
+      bind = $mainMod, J, togglesplit,                  # 切换分割方向
+      bind = $mainMod SHIFT, E, exit,                    # 退出 Hyprland
 
       # 移动焦点
       bind = $mainMod, left, movefocus, l
       bind = $mainMod, right, movefocus, r
       bind = $mainMod, up, movefocus, u
       bind = $mainMod, down, movefocus, d
+
+      # 移动窗口（Ctrl + 方向键，与 Niri 风格一致）
+      bind = $mainMod CTRL, left, movewindow, l
+      bind = $mainMod CTRL, right, movewindow, r
+      bind = $mainMod CTRL, up, movewindow, u
+      bind = $mainMod CTRL, down, movewindow, d
 
       # 切换工作区
       bind = $mainMod, 1, workspace, 1
@@ -179,9 +207,9 @@
       bind = $mainMod SHIFT, 9, movetoworkspace, 9
       bind = $mainMod SHIFT, 0, movetoworkspace, 10
 
-      # 特殊工作区（草稿本）
-      bind = $mainMod, S, togglespecialworkspace, magic
-      bind = $mainMod SHIFT, S, movetoworkspace, special:magic
+      # 特殊工作区 — 草稿本（从 Mod+S 移至 Mod+BackSpace，因 S 已分配给 Noctalia）
+      bind = $mainMod, backspace, togglespecialworkspace, magic
+      bind = $mainMod SHIFT, backspace, movetoworkspace, special:magic
 
       # 鼠标滚轮切换工作区
       bind = $mainMod, mouse_down, workspace, e+1
@@ -204,6 +232,15 @@
       bindl = , XF86AudioPause, exec, playerctl play-pause
       bindl = , XF86AudioPlay, exec, playerctl play-pause
       bindl = , XF86AudioPrev, exec, playerctl previous
+
+      # ==========================================================
+      # 截图（与 Niri 统一）
+      # ==========================================================
+      bind = $mainMod ALT, A, exec, grim -g "$(slurp)" - | wl-copy
+      bind = , Print, exec, grim -g "$(slurp)" - | wl-copy
+      bind = $mainMod SHIFT, S, exec, grim -g "$(slurp)" - | satty -f -
+      bind = CTRL, Print, exec, grim - | wl-copy
+      bind = ALT, Print, exec, grim -g "$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')" - | wl-copy
 
       # 导入 Noctalia 颜色配置（由 home.activation 自动初始化，
       # noctalia-shell 运行后可动态更新）

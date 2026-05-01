@@ -7,8 +7,9 @@
 
 {
   imports = [
-    ./nvidia.nix    # NVIDIA 显卡驱动
-    ./audio.nix     # 音频（PipeWire）
-    ./printing.nix  # 打印服务
+    ./nvidia.nix      # NVIDIA 显卡驱动
+    ./audio.nix       # 音频（PipeWire）
+    ./bluetooth.nix   # 蓝牙（BlueZ）
+    ./printing.nix    # 打印服务
   ];
 }

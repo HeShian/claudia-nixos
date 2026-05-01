@@ -47,7 +47,7 @@
       # Kitty 使用 kitty-direct 显示图片 logo，Alacritty 使用纯文本
       # ============================================================
       if [[ "$TERM" == "xterm-kitty" ]]; then
-          fastfetch -c /run/current-system/sw/share/fastfetch/presets/examples/21.jsonc \
+          fastfetch -c examples/21.jsonc \
                     --logo ~/.config/fastfetch/openbit.png \
                     --logo-type kitty-direct \
                     --logo-width 12 \

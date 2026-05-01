@@ -27,8 +27,10 @@
     ./niri.nix          # Niri 窗口管理器配置
     ./opencode.nix      # OpenCode AI 编码助手配置
     ./theming.nix       # GTK / Kvantum 主题配置（Dracula）
-    ./fish.nix          # Fish Shell 配置（Starship 提示符）
     ./migration.nix     # 从 ~/.config/ 迁移的遗留配置（fuzzel/noctalia/qt/remmina）
+    ./cava.nix          # Cava 音频可视化配置
+    ./satty.nix         # Satty 截图标注工具配置
+    ./clipse.nix        # Clipse 剪贴板管理器配置
   ];
 
   # --- 用户级软件包 ---
@@ -72,9 +74,36 @@
   home.file."Templates/新建文本文件.txt".text = "";
   home.file."Templates/新建 Markdown 文件.md".text = "";
 
-  # 右键"在终端中打开"替换为 Kitty（XDG MIME 方式）
-  xdg.mimeApps.defaultApplications = {
-    "x-scheme-handler/terminal" = "kitty.desktop";
+  # ===========================================================================
+  # 默认应用关联（MIME 类型）
+  # ===========================================================================
+  xdg.mimeApps = {
+    enable = true;
+    defaultApplications = {
+      "x-scheme-handler/http" = "firefox.desktop";
+      "x-scheme-handler/https" = "firefox.desktop";
+      "x-scheme-handler/chrome" = "firefox.desktop";
+      "text/html" = "firefox.desktop";
+      "application/x-extension-htm" = "firefox.desktop";
+      "application/x-extension-html" = "firefox.desktop";
+      "application/x-extension-shtml" = "firefox.desktop";
+      "application/xhtml+xml" = "firefox.desktop";
+      "application/x-extension-xhtml" = "firefox.desktop";
+      "application/x-extension-xht" = "firefox.desktop";
+      "x-scheme-handler/ccswitch" = "cc-switch-handler.desktop";
+      "x-scheme-handler/terminal" = "kitty.desktop";
+    };
+  };
+
+  # --- 禁用 Fcitx5 XDG 自动启动（由 Niri/Hyprland 的 spawn-at-startup 管理） ---
+  # 避免 systemd 在 compositor 协议栈未就绪时过早启动 fcitx5
+  # 导致终端模拟器（kitty/alacritty）的 zwp_text_input_v3 无法注册
+  xdg.configFile."autostart/org.fcitx.Fcitx5.desktop" = {
+    force = true;
+    text = ''
+      [Desktop Entry]
+      Hidden=true
+    '';
   };
 
   # --- 启用 Home Manager ---

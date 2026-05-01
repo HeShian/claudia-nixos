@@ -46,5 +46,33 @@
 
     # Dracula Kvantum 主题文件（从 Nix 商店链接到 ~/.config/Kvantum/Dracula/）
     "Kvantum/Dracula".source = "${pkgs.dracula-theme}/share/Kvantum/Dracula";
+
+    # =========================================================================
+    # Qt5 外观配置（qt5ct）— 配合 QT_STYLE_OVERRIDE=kvantum 作为回退
+    # =========================================================================
+    "qt5ct/qt5ct.conf" = {
+      force = true;
+      text = ''
+        [Appearance]
+        custom_palette=false
+        icon_theme=Dracula
+        standard_dialogs=default
+        style=kvantum
+      '';
+    };
+
+    # =========================================================================
+    # Qt6 外观配置（qt6ct）— 配合 QT_STYLE_OVERRIDE=kvantum 作为回退
+    # =========================================================================
+    "qt6ct/qt6ct.conf" = {
+      force = true;
+      text = ''
+        [Appearance]
+        custom_palette=false
+        icon_theme=Dracula
+        standard_dialogs=default
+        style=kvantum
+      '';
+    };
   };
 }
