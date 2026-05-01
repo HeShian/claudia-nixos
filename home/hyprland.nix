@@ -39,7 +39,6 @@
       ### 自动启动  ###
       #################
       exec-once = caelestia-shell
-      exec-once = blueman-applet
       exec-once = fcitx5 -d
 
       #############################

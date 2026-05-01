@@ -79,7 +79,6 @@
       // ================ 启动时自动运行的程序 ================
       spawn-at-startup  "noctalia-shell"
       spawn-at-startup "sh" "-c" "sleep 3 && fcitx5 -d"
-      spawn-at-startup "blueman-applet"
       spawn-at-startup "clipse" "--listen"
 
       // ================ 环境变量设置 ================

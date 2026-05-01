@@ -55,7 +55,7 @@ This repository contains my personal NixOS system configuration, managed entirel
 | **Shell** | Noctalia Shell (Niri) + Caelestia Shell (Hyprland) |
 | **GPU** | NVIDIA proprietary driver with modesetting + VA-API |
 | **Audio** | PipeWire with WirePlumber, Bluetooth codecs (LDAC/AAC/aptX) |
-| **Bluetooth** | BlueZ + Blueman, handled by Caelestia Shell pairing UI |
+| **Bluetooth** | BlueZ, pairing handled by Noctalia / Caelestia Shell built-in UI |
 | **Input** | Fcitx5 (Pinyin + Rime) with Nord theme, Wayland text-input-v3 |
 | **Fonts** | Cascadia Code, JetBrains Mono Nerd Font, Noto CJK |
 | **Theme** | Dracula dark — GTK 2/3/4 + Kvantum (Qt5/Qt6) |
@@ -220,7 +220,7 @@ sudo nixos-rebuild switch --flake /etc/nixos#westwood
 | **Shell** | Noctalia Shell（Niri）+ Caelestia Shell（Hyprland） |
 | **显卡** | NVIDIA 闭源驱动 + modesetting + VA-API 硬件解码 |
 | **音频** | PipeWire + WirePlumber，蓝牙编解码（LDAC/AAC/aptX） |
-| **蓝牙** | BlueZ + Blueman，由 Caelestia Shell 配对界面管理 |
+| **蓝牙** | BlueZ，Noctalia / Caelestia Shell 内置配对界面管理 |
 | **输入法** | Fcitx5（拼音 + Rime 中古音），Nord 主题，Wayland text-input-v3 |
 | **字体** | Cascadia Code、JetBrains Mono Nerd Font、Noto CJK |
 | **主题** | Dracula 暗色 — GTK 2/3/4 + Kvantum（Qt5/Qt6） |

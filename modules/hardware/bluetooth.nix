@@ -12,8 +12,5 @@
     powerOnBoot = true;   # 启动时自动打开蓝牙控制器
   };
 
-  # --- 蓝牙管理工具 ---
-  services.blueman.enable = true;  # Blueman GUI 蓝牙管理器（托盘图标）
-
-  # GNOME 蓝牙未安装 — 使用 Caelestia Shell 的蓝牙配对功能
+  # Blueman 未安装 — 蓝牙配对由 Noctalia / Caelestia Shell 内置模块处理
 }
