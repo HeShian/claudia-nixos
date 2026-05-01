@@ -4,8 +4,60 @@
 # 说明:     所有之前未受 Nix 管理的配置文件统一在此管理，
 #           确保系统配置的完整可复现性
 # =============================================================================
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
+let
+  # =========================================================================
+  # Noctalia 默认配置（作为初始值，首次部署后由 Noctalia 自行管理）
+  # 使用 home.activation 而非 xdg.configFile，因为 xdg.configFile 创建的是
+  # nix store 的只读符号链接，Noctalia 无法写入 → UI 修改全部静默失败
+  # =========================================================================
+  noctaliaDefaults = pkgs.runCommand "noctalia-defaults" {} ''
+    mkdir -p $out/noctalia
+
+    cat > $out/noctalia/colors.json << 'COLORS_EOF'
+    ${builtins.toJSON {
+      mPrimary = "#5ed4fd";
+      mOnPrimary = "#003544";
+      mSecondary = "#b3cad5";
+      mOnSecondary = "#1e333c";
+      mTertiary = "#c4c3eb";
+      mOnTertiary = "#2d2d4d";
+      mError = "#ffb4ab";
+      mOnError = "#690005";
+      mSurface = "#111415";
+      mOnSurface = "#e1e3e4";
+      mSurfaceVariant = "#1d2022";
+      mOnSurfaceVariant = "#c0c8cc";
+      mOutline = "#40484c";
+    }}
+    COLORS_EOF
+
+    cat > $out/noctalia/settings.json << 'SETTINGS_EOF'
+    ${builtins.toJSON {
+      appLauncher = {
+        autoPasteClipboard = false;
+        clipboardWatchImageCommand = "wl-paste --type image --watch cliphist store";
+        clipboardWatchTextCommand = "wl-paste --type text --watch cliphist store";
+      };
+    }}
+    SETTINGS_EOF
+
+    cat > $out/noctalia/plugins.json << 'PLUGINS_EOF'
+    ${builtins.toJSON {
+      sources = [
+        {
+          enabled = true;
+          name = "Noctalia Plugins";
+          url = "https://github.com/noctalia-dev/noctalia-plugins";
+        }
+      ];
+      states = { };
+      version = 2;
+    }}
+    PLUGINS_EOF
+  '';
+in
 {
   # ===========================================================================
   # Fuzzel 应用启动器配置
@@ -42,56 +94,10 @@
     };
 
     # =========================================================================
-    # Noctalia Shell 配置
+    # Noctalia Shell 配置 — 由 home.activation 管理（见文件末尾）
+    # 使用可写真实文件替代 xdg.configFile 的只读符号链接，
+    # 确保 Noctalia UI 的修改能真正写入磁盘
     # =========================================================================
-
-    # --- Noctalia 配色方案 ---
-    "noctalia/colors.json" = {
-      force = true;
-      text = builtins.toJSON {
-        mPrimary = "#5ed4fd";
-        mOnPrimary = "#003544";
-        mSecondary = "#b3cad5";
-        mOnSecondary = "#1e333c";
-        mTertiary = "#c4c3eb";
-        mOnTertiary = "#2d2d4d";
-        mError = "#ffb4ab";
-        mOnError = "#690005";
-        mSurface = "#111415";
-        mOnSurface = "#e1e3e4";
-        mSurfaceVariant = "#1d2022";
-        mOnSurfaceVariant = "#c0c8cc";
-        mOutline = "#40484c";
-      };
-    };
-
-    # --- Noctalia 设置 ---
-    "noctalia/settings.json" = {
-      force = true;
-      text = builtins.toJSON {
-        appLauncher = {
-          autoPasteClipboard = false;
-          clipboardWatchImageCommand = "wl-paste --type image --watch cliphist store";
-          clipboardWatchTextCommand = "wl-paste --type text --watch cliphist store";
-        };
-      };
-    };
-
-    # --- Noctalia 插件源 ---
-    "noctalia/plugins.json" = {
-      force = true;
-      text = builtins.toJSON {
-        sources = [
-          {
-            enabled = true;
-            name = "Noctalia Plugins";
-            url = "https://github.com/noctalia-dev/noctalia-plugins";
-          }
-        ];
-        states = { };
-        version = 2;
-      };
-    };
 
     # =========================================================================
     # Alacritty Noctalia 主题（未启用，仅备份保留）
@@ -215,6 +221,30 @@
       '';
     };
   };
+
+  # ===========================================================================
+  # Noctalia 可写配置激活脚本
+  # 将默认配置文件从 nix store 复制到 ~/.config/noctalia/ 作为真实文件
+  # （而非只读符号链接），确保 Noctalia UI 的修改能真正写入磁盘并持久化。
+  # 仅在文件不存在或为符号链接时复制；用户已有的真实文件不受影响。
+  # ===========================================================================
+  home.activation.copyNoctaliaDefaults = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    NOCTALIA_DIR="$HOME/.config/noctalia"
+    mkdir -p "$NOCTALIA_DIR"
+
+    for f in colors.json settings.json plugins.json; do
+      target="$NOCTALIA_DIR/$f"
+      # 删除旧的只读符号链接（指向 nix store，cp 无法覆写）
+      if [ -L "$target" ]; then
+        rm -f "$target"
+      fi
+      # 如果目标不存在 → 复制默认值
+      if [ ! -f "$target" ]; then
+        cp ${noctaliaDefaults}/noctalia/$f "$target"
+        chmod 644 "$target"
+      fi
+    done
+  '';
 
   # ===========================================================================
   # 清理：移除 ~/.config/nix/nix.conf（GitHub Token 已移至 /etc/nix/）

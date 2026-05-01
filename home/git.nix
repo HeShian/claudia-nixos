@@ -19,7 +19,7 @@
     enable = true;
 
     # --- Git 用户信息 ---
-    extraConfig = {
+    settings = {
       user = {
         name = "claudia";
         email = "3453289292@qq.com";
