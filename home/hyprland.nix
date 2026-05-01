@@ -53,6 +53,8 @@
       env = SDL_IM_MODULE,fcitx
       env = GLFW_IM_MODULE,ibus
       env = LANG,zh_CN.UTF-8
+      # Qt6 输入法模块优先级：Wayland text-input-v3 → fcitx5 DBus → ibus
+      env = QT_IM_MODULES,wayland;fcitx;ibus
 
       #####################
       ### 外观设置 ###
