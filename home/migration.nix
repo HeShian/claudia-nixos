@@ -96,104 +96,110 @@ let
 in
 {
   # ===========================================================================
-  # Fcitx5 Dracula 自定义主题（安装到 ~/.local/share/fcitx5/themes/Dracula/）
+  # Fcitx5 Dracula 主题 — 作为真实文件部署到 ~/.local/share/fcitx5/themes/Dracula/
+  # （xdg.dataFile 的符号链接在 fcitx5 搜索路径中可能不可见）
   # ===========================================================================
-  xdg.dataFile = {
-    "fcitx5/themes/Dracula/theme.conf" = {
-      text = ''
-        [Metadata]
-        Name=Dracula
-        Version=1.0
-        Author=Claudia
-        Description=Dracula Dark Theme for Fcitx5
-        ScaleWithDPI=True
+  home.activation.installFcitx5DraculaTheme = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    THEME_DIR="$HOME/.local/share/fcitx5/themes/Dracula"
 
-        [InputPanel]
-        Font=Sans 13
-        NormalColor=#f8f8f2
-        HighlightCandidateColor=#bd93f9
-        HighlightColor=#f8f8f2
-        HighlightBackgroundColor=#44475a
-        Spacing=3
+    # 删除旧的符号链接（xdg.dataFile 遗留）
+    if [ -L "$THEME_DIR/theme.conf" ]; then rm -f "$THEME_DIR/theme.conf"; fi
+    if [ -L "$THEME_DIR/arrow.png" ]; then rm -f "$THEME_DIR/arrow.png"; fi
+    if [ -L "$THEME_DIR/radio.png" ]; then rm -f "$THEME_DIR/radio.png"; fi
 
-        [InputPanel/TextMargin]
-        Left=10
-        Right=10
-        Top=6
-        Bottom=6
+    mkdir -p "$THEME_DIR"
+    cat > "$THEME_DIR/theme.conf" << 'THEME_EOF'
+    [Metadata]
+    Name=Dracula
+    Version=1.0
+    Author=Claudia
+    Description=Dracula Dark Theme for Fcitx5
+    ScaleWithDPI=True
 
-        [InputPanel/Background]
-        Color=#282a36
+    [InputPanel]
+    Font=Sans 13
+    NormalColor=#f8f8f2
+    HighlightCandidateColor=#bd93f9
+    HighlightColor=#f8f8f2
+    HighlightBackgroundColor=#44475a
+    Spacing=3
 
-        [InputPanel/Background/Margin]
-        Left=2
-        Right=2
-        Top=2
-        Bottom=2
+    [InputPanel/TextMargin]
+    Left=10
+    Right=10
+    Top=6
+    Bottom=6
 
-        [InputPanel/Highlight]
-        Color=#44475a
+    [InputPanel/Background]
+    Color=#282a36
 
-        [InputPanel/Highlight/Margin]
-        Left=10
-        Right=10
-        Top=7
-        Bottom=7
+    [InputPanel/Background/Margin]
+    Left=2
+    Right=2
+    Top=2
+    Bottom=2
 
-        [Menu]
-        Font=Sans 10
-        NormalColor=#f8f8f2
-        Spacing=3
+    [InputPanel/Highlight]
+    Color=#44475a
 
-        [Menu/Background]
-        Color=#282a36
+    [InputPanel/Highlight/Margin]
+    Left=10
+    Right=10
+    Top=7
+    Bottom=7
 
-        [Menu/Background/Margin]
-        Left=2
-        Right=2
-        Top=2
-        Bottom=2
+    [Menu]
+    Font=Sans 10
+    NormalColor=#f8f8f2
+    Spacing=3
 
-        [Menu/ContentMargin]
-        Left=2
-        Right=2
-        Top=2
-        Bottom=2
+    [Menu/Background]
+    Color=#282a36
 
-        [Menu/Highlight]
-        Color=#44475a
+    [Menu/Background/Margin]
+    Left=2
+    Right=2
+    Top=2
+    Bottom=2
 
-        [Menu/Highlight/Margin]
-        Left=10
-        Right=10
-        Top=5
-        Bottom=5
+    [Menu/ContentMargin]
+    Left=2
+    Right=2
+    Top=2
+    Bottom=2
 
-        [Menu/Separator]
-        Color=#44475a
+    [Menu/Highlight]
+    Color=#44475a
 
-        [Menu/CheckBox]
-        Image=radio.png
+    [Menu/Highlight/Margin]
+    Left=10
+    Right=10
+    Top=5
+    Bottom=5
 
-        [Menu/SubMenu]
-        Image=arrow.png
+    [Menu/Separator]
+    Color=#44475a
 
-        [Menu/TextMargin]
-        Left=5
-        Right=5
-        Top=5
-        Bottom=5
-      '';
-    };
+    [Menu/CheckBox]
+    Image=radio.png
 
-    "fcitx5/themes/Dracula/arrow.png" = {
-      source = "${pkgs.fcitx5-nord}/share/fcitx5/themes/Nord-Dark/arrow.png";
-    };
+    [Menu/SubMenu]
+    Image=arrow.png
 
-    "fcitx5/themes/Dracula/radio.png" = {
-      source = "${pkgs.fcitx5-nord}/share/fcitx5/themes/Nord-Dark/radio.png";
-    };
-  };
+    [Menu/TextMargin]
+    Left=5
+    Right=5
+    Top=5
+    Bottom=5
+    THEME_EOF
+
+    cp ${pkgs.fcitx5-nord}/share/fcitx5/themes/Nord-Dark/arrow.png "$THEME_DIR/arrow.png"
+    cp ${pkgs.fcitx5-nord}/share/fcitx5/themes/Nord-Dark/radio.png "$THEME_DIR/radio.png"
+    echo "[fcitx5] Dracula theme installed to $THEME_DIR"
+  '';
+
+  # ===========================================================================
+  # 清理旧的 xdg.dataFile 符号链接（被 home.activation 真实文件替代）
 
   # ===========================================================================
   # Fuzzel 应用启动器配置
