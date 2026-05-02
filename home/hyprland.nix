@@ -40,6 +40,8 @@
       #################
       exec-once = caelestia-shell
       exec-once = fcitx5 -d
+      # 传播输入法环境变量到 D-Bus/Systemd（确保 fuzzel 等启动的应用继承）
+      exec-once = dbus-update-activation-environment --systemd GTK_IM_MODULE QT_IM_MODULE XMODIFIERS SDL_IM_MODULE
 
       #############################
       ### 环境变量 ###
@@ -52,6 +54,7 @@
       env = QT_IM_MODULE,fcitx
       env = SDL_IM_MODULE,fcitx
       env = GLFW_IM_MODULE,ibus
+      env = XMODIFIERS,@im=fcitx
       env = LANG,zh_CN.UTF-8
       # 锁定 Dracula 主题（防止 Caelestia 通过 dconf 覆写）
       env = GTK_THEME,Dracula
@@ -154,6 +157,7 @@
       bind = $mainMod, Z, exec, $menu                                  # 应用启动器 (fuzzel)
       bind = $mainMod, E, exec, $fileManager           # 文件管理器 (nautilus)
       bind = $mainMod, B, exec, firefox                 # 浏览器
+      bind = $mainMod, F1, exec, pkill fcitx5; sleep 0.5; fcitx5 -d  # 重启输入法 (workaround: kitty关闭后text-input残留)
 
       # ==========================================================
       # Caelestia Shell 快捷键（默认 Shell）
