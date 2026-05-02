@@ -63,7 +63,8 @@
     ];
 
     # Wayland 前端支持
-    fcitx5.waylandFrontend = true;
+    # 在 Hyprland 下有 IME 状态残留 bug，关闭后改用 GTK/QT IM 模块
+    fcitx5.waylandFrontend = false;
   };
 
   # --- 4. 全局输入法环境变量 ---
