@@ -50,11 +50,9 @@
       env = HYPRCURSOR_SIZE,24
       env = XCURSOR_THEME,Bibata-Modern-Ice
       env = HYPRCURSOR_THEME,Bibata-Modern-Ice
-      env = GTK_IM_MODULE,fcitx
       env = QT_IM_MODULE,fcitx
       env = SDL_IM_MODULE,fcitx
       env = GLFW_IM_MODULE,ibus
-      env = XMODIFIERS,@im=fcitx
       env = LANG,zh_CN.UTF-8
       # 锁定 Dracula 主题（防止 Caelestia 通过 dconf 覆写）
       env = GTK_THEME,Dracula

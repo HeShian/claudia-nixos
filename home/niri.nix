@@ -93,8 +93,8 @@
           TERMINAL "kitty"
 
           // 区域与输入法环境变量（Fcitx5）
+          // GTK_IM_MODULE 不设置→ GTK 应用使用 Wayland text-input-v3
           LANG "zh_CN.UTF-8"
-          GTK_IM_MODULE "fcitx"
           QT_IM_MODULE "fcitx"
           SDL_IM_MODULE "fcitx"
           GLFW_IM_MODULE "ibus"

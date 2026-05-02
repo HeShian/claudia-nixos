@@ -65,11 +65,12 @@
   };
 
   # --- 4. 全局输入法环境变量 ---
-  # 确保所有应用（包括 Electron/AppImage 封装的微信、QQ）能使用 Fcitx5
+  # GTK_IM_MODULE 不设置→ GTK3/4 应用使用 Wayland text-input-v3 (统一 Classic UI 主题)
+  # QT_IM_MODULE=fcitx → Qt5 应用仍需 (不支持 text-input-v3)
+  # GLFW_IM_MODULE=ibus → GLFW 应用兼容
   environment.variables = {
-    GTK_IM_MODULE = "fcitx";
     QT_IM_MODULE = "fcitx";
     SDL_IM_MODULE = "fcitx";
-    GLFW_IM_MODULE = "ibus";  # GLFW 使用 ibus 协议兼容 Fcitx5
+    GLFW_IM_MODULE = "ibus";
   };
 }
