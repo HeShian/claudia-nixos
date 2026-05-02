@@ -8,104 +8,6 @@
 
 let
   # =========================================================================
-  # Fcitx5 Dracula 自定义主题
-  # =========================================================================
-  fcitx5-dracula-theme = pkgs.stdenv.mkDerivation {
-    name = "fcitx5-dracula-theme";
-    dontUnpack = true;
-    installPhase = ''
-      mkdir -p $out/share/fcitx5/themes/Dracula
-      cat > $out/share/fcitx5/themes/Dracula/theme.conf << 'THEME_EOF'
-      [Metadata]
-      Name=Dracula
-      Version=1.0
-      Author=Claudia
-      Description=Dracula Dark Theme for Fcitx5
-      ScaleWithDPI=True
-
-      [InputPanel]
-      Font=Sans 13
-      NormalColor=#f8f8f2
-      HighlightCandidateColor=#bd93f9
-      HighlightColor=#f8f8f2
-      HighlightBackgroundColor=#44475a
-      Spacing=3
-
-      [InputPanel/TextMargin]
-      Left=10
-      Right=10
-      Top=6
-      Bottom=6
-
-      [InputPanel/Background]
-      Color=#282a36
-
-      [InputPanel/Background/Margin]
-      Left=2
-      Right=2
-      Top=2
-      Bottom=2
-
-      [InputPanel/Highlight]
-      Color=#44475a
-
-      [InputPanel/Highlight/Margin]
-      Left=10
-      Right=10
-      Top=7
-      Bottom=7
-
-      [Menu]
-      Font=Sans 10
-      NormalColor=#f8f8f2
-      Spacing=3
-
-      [Menu/Background]
-      Color=#282a36
-
-      [Menu/Background/Margin]
-      Left=2
-      Right=2
-      Top=2
-      Bottom=2
-
-      [Menu/ContentMargin]
-      Left=2
-      Right=2
-      Top=2
-      Bottom=2
-
-      [Menu/Highlight]
-      Color=#44475a
-
-      [Menu/Highlight/Margin]
-      Left=10
-      Right=10
-      Top=5
-      Bottom=5
-
-      [Menu/Separator]
-      Color=#44475a
-
-      [Menu/CheckBox]
-      Image=radio.png
-
-      [Menu/SubMenu]
-      Image=arrow.png
-
-      [Menu/TextMargin]
-      Left=5
-      Right=5
-      Top=5
-      Bottom=5
-      THEME_EOF
-
-      cp ${pkgs.fcitx5-nord}/share/fcitx5/themes/Nord-Dark/arrow.png $out/share/fcitx5/themes/Dracula/arrow.png
-      cp ${pkgs.fcitx5-nord}/share/fcitx5/themes/Nord-Dark/radio.png $out/share/fcitx5/themes/Dracula/radio.png
-    '';
-  };
-
-  # =========================================================================
   # Noctalia 默认配置（作为初始值，首次部署后由 Noctalia 自行管理）
   # 使用 home.activation 而非 xdg.configFile，因为 xdg.configFile 创建的是
   # nix store 的只读符号链接，Noctalia 无法写入 → UI 修改全部静默失败
@@ -194,9 +96,104 @@ let
 in
 {
   # ===========================================================================
-  # 安装 Fcitx5 Dracula 自定义主题
+  # Fcitx5 Dracula 自定义主题（安装到 ~/.local/share/fcitx5/themes/Dracula/）
   # ===========================================================================
-  home.packages = [ fcitx5-dracula-theme ];
+  xdg.dataFile = {
+    "fcitx5/themes/Dracula/theme.conf" = {
+      text = ''
+        [Metadata]
+        Name=Dracula
+        Version=1.0
+        Author=Claudia
+        Description=Dracula Dark Theme for Fcitx5
+        ScaleWithDPI=True
+
+        [InputPanel]
+        Font=Sans 13
+        NormalColor=#f8f8f2
+        HighlightCandidateColor=#bd93f9
+        HighlightColor=#f8f8f2
+        HighlightBackgroundColor=#44475a
+        Spacing=3
+
+        [InputPanel/TextMargin]
+        Left=10
+        Right=10
+        Top=6
+        Bottom=6
+
+        [InputPanel/Background]
+        Color=#282a36
+
+        [InputPanel/Background/Margin]
+        Left=2
+        Right=2
+        Top=2
+        Bottom=2
+
+        [InputPanel/Highlight]
+        Color=#44475a
+
+        [InputPanel/Highlight/Margin]
+        Left=10
+        Right=10
+        Top=7
+        Bottom=7
+
+        [Menu]
+        Font=Sans 10
+        NormalColor=#f8f8f2
+        Spacing=3
+
+        [Menu/Background]
+        Color=#282a36
+
+        [Menu/Background/Margin]
+        Left=2
+        Right=2
+        Top=2
+        Bottom=2
+
+        [Menu/ContentMargin]
+        Left=2
+        Right=2
+        Top=2
+        Bottom=2
+
+        [Menu/Highlight]
+        Color=#44475a
+
+        [Menu/Highlight/Margin]
+        Left=10
+        Right=10
+        Top=5
+        Bottom=5
+
+        [Menu/Separator]
+        Color=#44475a
+
+        [Menu/CheckBox]
+        Image=radio.png
+
+        [Menu/SubMenu]
+        Image=arrow.png
+
+        [Menu/TextMargin]
+        Left=5
+        Right=5
+        Top=5
+        Bottom=5
+      '';
+    };
+
+    "fcitx5/themes/Dracula/arrow.png" = {
+      source = "${pkgs.fcitx5-nord}/share/fcitx5/themes/Nord-Dark/arrow.png";
+    };
+
+    "fcitx5/themes/Dracula/radio.png" = {
+      source = "${pkgs.fcitx5-nord}/share/fcitx5/themes/Nord-Dark/radio.png";
+    };
+  };
 
   # ===========================================================================
   # Fuzzel 应用启动器配置
@@ -338,11 +335,15 @@ in
     };
 
     # =========================================================================
-    # Fcitx5 主题 — Dracula 风格暗色（Nord-Dark）
+    # Fcitx5 主题 — Dracula 暗色
     # =========================================================================
     "fcitx5/conf/classicui.conf" = {
       force = true;
       text = ''
+        # 提升 Classic UI 优先级（高于 Kimpanel 的 50）
+        [Addon]
+        UIPriority=60
+
         # 垂直候选列表
         Vertical Candidate List=False
         # 使用鼠标滚轮翻页
@@ -384,7 +385,7 @@ in
     "fcitx5/conf/kimpanel.conf" = {
       force = true;
       text = ''
-        # 禁用 Kimpanel 面板集成，统一使用 Classic UI (Nord-Dark)
+        [Addon]
         Enabled=False
       '';
     };
