@@ -91,8 +91,12 @@
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.backupFileExtension = "bak";  # 覆盖旧文件前自动备份
-          home-manager.users.claudia = {
-            imports = [ ./home/default.nix ];
+          home-manager.extraSpecialArgs = { inherit inputs; };
+          home-manager.users.claudia = { inputs, ... }: {
+            imports = [
+              inputs.nixvim.homeModules.nixvim
+              ./home/default.nix
+            ];
           };
         }
 

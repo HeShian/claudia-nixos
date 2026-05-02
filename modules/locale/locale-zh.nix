@@ -45,9 +45,9 @@
       qt6Packages.fcitx5-chinese-addons   # 拼音输入法
       fcitx5-pinyin-zhwiki                # 维基百科词库
 
-      # Rime 输入法引擎（中古音/五笔等）
+      # Rime 输入法引擎（霧淞拼音 + 小鹤双拼）
       fcitx5-rime
-      rime-data
+      rime-ice                           # 霧淞拼音（含全拼和双拼方案）
 
       # 配置工具
       qt6Packages.fcitx5-configtool       # GUI 配置工具
@@ -62,6 +62,17 @@
     # Wayland 前端支持
     # 在 Hyprland 下有 IME 状态残留 bug，关闭后改用 GTK/QT IM 模块
     fcitx5.waylandFrontend = false;
+
+    # 输入法配置（Profile — 默认使用 Rime 霧淞拼音）
+    fcitx5.settings.inputMethod = {
+      "Groups/0" = {
+        Name = "默认";
+        DefaultLayout = "us";
+        DefaultIM = "rime";
+      };
+      "Groups/0/Items/0" = { Name = "keyboard-us"; Layout = ""; };
+      "Groups/0/Items/1" = { Name = "rime"; Layout = ""; };
+    };
   };
 
   # --- 4. 全局输入法环境变量 ---

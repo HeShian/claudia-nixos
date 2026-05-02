@@ -28,6 +28,8 @@
     ./opencode.nix      # OpenCode AI 编码助手配置
     ./theming.nix       # GTK / Kvantum 主题配置（Dracula）
     ./migration.nix     # 从 ~/.config/ 迁移的遗留配置（fuzzel/noctalia/qt/remmina）
+    ./nixvim.nix        # Neovim 编辑器（NixVim）— 完整的 IDE 配置
+    ./rime.nix          # Rime 输入法配置（霧淞拼音 + 小鹤双拼）
     ./cava.nix          # Cava 音频可视化配置
     ./satty.nix         # Satty 截图标注工具配置
     ./clipse.nix        # Clipse 剪贴板管理器配置
@@ -73,6 +75,25 @@
   # 右键"新建文档"模板（Nautilus 检测到 ~/Templates/ 目录后显示此菜单）
   home.file."Templates/新建文本文件.txt".text = "";
   home.file."Templates/新建 Markdown 文件.md".text = "";
+
+  # ===========================================================================
+  # Shell 共享初始化脚本（被 bash.nix / zsh.nix 共同 source）
+  # ===========================================================================
+  home.file.".config/shell/init-common.sh".text = ''
+    # ============================================================
+    # 终端启动特效（fastfetch）
+    # Kitty 使用 kitty-direct 显示图片 logo，Alacritty 使用纯文本
+    # ============================================================
+    if [[ "''$TERM" == "xterm-kitty" ]]; then
+        fastfetch -c examples/21.jsonc \
+                  --logo "$HOME/.config/fastfetch/openbit.png" \
+                  --logo-type kitty-direct \
+                  --logo-width 12 \
+                  --logo-height 0
+    elif [[ "''$TERM" == *"alacritty"* ]] || [[ "''$TERM" == "alacritty" ]]; then
+        fastfetch
+    fi
+  '';
 
   # ===========================================================================
   # 默认应用关联（MIME 类型）

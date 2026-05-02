@@ -108,6 +108,9 @@ This repository contains my personal NixOS system configuration, managed entirel
     ├── alacritty.nix / kitty.nix      # Terminal emulators
     ├── git.nix / vim.nix              # Development tools
     ├── cava.nix / clipse.nix / satty.nix  # Audio viz, clipboard, screenshots
+    ├── btop.nix / fastfetch.nix           # System monitoring
+    ├── opencode.nix                       # AI coding assistant
+    ├── readline.nix                       # Readline config
     ├── theming.nix                     # GTK/Kvantum (Dracula dark)
     └── migration.nix                  # Legacy configs + Noctalia theme generator
 ```
@@ -176,7 +179,7 @@ Additionally, `fcitx5`'s `UseAccentColor` is set to `False` so the input method 
 
 #### Prerequisites
 
-- NixOS 25.05+ installed from the [official ISO](https://nixos.org/download)
+- NixOS 26.05+ (or nixos-unstable) installed from the [official ISO](https://nixos.org/download)
 - Basic familiarity with Nix flakes and NixOS modules
 
 #### Step 1: Clone the repository
@@ -191,9 +194,8 @@ git clone https://github.com/HeShian/claudia-nixos.git /etc/nixos
 
 ```bash
 # Generate your own hardware config (REQUIRED)
+# This writes directly to /etc/nixos/hardware-configuration.nix
 nixos-generate-config --root /
-# Copy the generated file
-sudo cp /etc/nixos/hardware-configuration.nix /etc/nixos/
 ```
 
 **Things you MUST adjust:**
@@ -211,6 +213,8 @@ sudo chmod 600 /etc/nix/github-access-tokens
 
 This increases the GitHub API rate limit from 60 to 5000 requests/hour during Nix builds.
 
+> ⏱ **First build** may take 1-3 hours depending on your network and CPU. Subsequent builds are much faster thanks to the Nix cache.
+
 #### Step 4: Build and switch
 
 ```bash
@@ -220,21 +224,31 @@ sudo reboot
 
 After reboot, log in as user `claudia` via **Ly** (TUI display manager) — choose Niri or Hyprland from the session menu.
 
+> 🔑 The default password is empty (no password set for first login). Run `passwd` immediately after first login.
+
 #### Step 5: Post-install setup
 
 ```bash
+# Set password (default is empty)
 passwd
+
+# Configure git
 git config --global user.name "Your Name"
 git config --global user.email "your@email.com"
 ssh-keygen -t ed25519 -C "your@email.com"
 cat ~/.ssh/id_ed25519.pub  # add to GitHub
+
+# Deploy Rime input method schemas (first time only)
+# Press Super+Space to switch to Rime, then press Ctrl+` (backtick)
+# In the menu, select "部署" (deploy) to compile 霧淞拼音 + 小鹤双拼
 ```
 
 #### Verification
 
 | Component | Test |
 |---|---|
-| Chinese input | Open kitty (`Mod+Return`), press `Ctrl+Space` to toggle IM |
+| Chinese input | `Ctrl+Space` to toggle Fcitx5. In Rime: `Ctrl+\`` to switch schemas (霧淞拼音 / 小鹤双拼) |
+| Neovim IDE | `nvim` to start. `,e` file tree, `,ff` search files, `,y` copy to clipboard |
 | Bluetooth | Open Caelestia control panel (`Mod+Comma`) → Bluetooth |
 | Screenshot | `Print` for region, `Ctrl+Print` for full-screen |
 | Launcher | `Mod+D` (Caelestia) or `Mod+Z` (Fuzzel, Hyprland only) |
@@ -352,7 +366,8 @@ sudo nixos-rebuild switch --rollback
 |---|---|
 | `nixpkgs/nixos-unstable` | Rolling-release package collection |
 | `nix-community/home-manager` | User-level package and dotfile management |
-| `outfoxxed/quickshell` | Desktop widget framework (foundation for Noctalia/Caelestia) |
+| `outfoxxed/quickshell` | Desktop widget framework (foundation for all shells) |
+| `AvengeMedia/DankMaterialShell` | Material Design shell (dms) |
 | `noctalia-dev/noctalia-shell` | Noctalia desktop shell (Niri default) |
 | `caelestia-dots/shell` | Caelestia desktop shell (Hyprland default) |
 | `nix-community/nixvim` | Neovim configuration framework |
@@ -441,6 +456,9 @@ sudo nixos-rebuild switch --rollback
     ├── alacritty.nix / kitty.nix      # 终端模拟器
     ├── git.nix / vim.nix              # 开发工具
     ├── cava.nix / clipse.nix / satty.nix  # 音频可视化、剪贴板、截图
+    ├── btop.nix / fastfetch.nix           # 系统监控
+    ├── opencode.nix                       # AI 编码助手
+    ├── readline.nix                       # Readline 配置
     ├── theming.nix                     # GTK/Kvantum(Dracula 暗色主题)
     └── migration.nix                  # 遗留配置 + Noctalia 主题生成器
 ```
@@ -515,7 +533,7 @@ Caelestia Shell 切换壁纸或配色时会通过 dconf/gsettings 把全局 GTK 
 
 #### 前置条件
 
-- 已从[官方 ISO](https://nixos.org/download) 安装 NixOS 25.05+
+- 已从[官方 ISO](https://nixos.org/download) 安装 NixOS 26.05+（或 nixos-unstable）
 - 熟悉 Nix flakes 和 NixOS 模块的基本概念
 
 #### 第一步：克隆仓库
@@ -530,9 +548,8 @@ git clone https://github.com/HeShian/claudia-nixos.git /etc/nixos
 
 ```bash
 # 生成你自己的硬件配置（必需）
+# 该命令直接输出到 /etc/nixos/hardware-configuration.nix
 nixos-generate-config --root /
-# 复制生成的文件
-sudo cp /etc/nixos/hardware-configuration.nix /etc/nixos/
 ```
 
 **必须调整的内容：**
@@ -562,18 +579,26 @@ sudo reboot
 #### 第五步：首次设置
 
 ```bash
+# 设置密码（默认无密码）
 passwd
+
+# 配置 git
 git config --global user.name "你的名字"
 git config --global user.email "your@email.com"
 ssh-keygen -t ed25519 -C "your@email.com"
 cat ~/.ssh/id_ed25519.pub  # 添加到 GitHub
+
+# 部署 Rime 输入法方案（首次使用）
+# Super+Space 切换到 Rime，按 Ctrl+` 打开方案菜单
+# 选择"部署"以编译霧淞拼音 + 小鹤双拼
 ```
 
 #### 验证
 
 | 组件 | 测试方法 |
 |---|---|
-| 中文输入 | 打开 kitty (`Mod+Return`)，按 `Ctrl+Space` 切换输入法 |
+| 中文输入 | `Ctrl+Space` 切换。Rime 下 `Ctrl+\`` 切换方案（霧淞拼音/小鹤双拼） |
+| Neovim IDE | `nvim` 启动。`,e` 文件树，`,ff` 搜索文件，`,y` 复制到剪贴板 |
 | 蓝牙 | 打开 Caelestia 控制面板 (`Mod+Comma`) → 蓝牙 |
 | 截图 | `Print` 区域截图，`Ctrl+Print` 全屏截图 |
 | 启动器 | `Mod+D`（Caelestia）或 `Mod+Z`（Fuzzel，仅 Hyprland） |
@@ -696,7 +721,8 @@ sudo nixos-rebuild switch --rollback
 |---|---|
 | `nixpkgs/nixos-unstable` | 滚动更新的软件包集合 |
 | `nix-community/home-manager` | 用户级软件包和配置文件管理 |
-| `outfoxxed/quickshell` | 桌面组件框架（Noctalia/Caelestia 的基础） |
+| `outfoxxed/quickshell` | 桌面组件框架（所有 Shell 的基础） |
+| `AvengeMedia/DankMaterialShell` | Material Design 风格桌面 Shell |
 | `noctalia-dev/noctalia-shell` | Noctalia 桌面 Shell（Niri 默认） |
 | `caelestia-dots/shell` | Caelestia 桌面 Shell（Hyprland 默认） |
 | `nix-community/nixvim` | Neovim 配置框架 |

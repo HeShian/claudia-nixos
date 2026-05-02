@@ -2,7 +2,7 @@
 # 文件名:   home/kitty.nix
 # 功能描述: Kitty 终端模拟器配置
 # 说明:     从 ~/dotfiles/.config/kitty/ 迁移至 Home Manager 管理。
-#           配置字体、光标、快捷键、透明度和搜索功能。
+#           配置字体、光标、快捷键、透明度和 Gruvbox Dark Hard 主题
 # =============================================================================
 { config, pkgs, ... }:
 
@@ -28,40 +28,53 @@
       # ================================================================
       # 光标设置
       # ================================================================
-      cursor_shape = "beam";       # 竖线光标（类似 GUI 编辑器）
-      cursor_trail = 1;            # 光标拖尾效果
+      cursor_shape = "beam";
+      cursor_trail = 1;
 
       # ================================================================
-      # 窗口内边距
+      # 窗口设置
       # ================================================================
       window_margin_width = "20";
-
-      # ================================================================
-      # 退出时不确认
-      # ================================================================
       confirm_os_window_close = "0";
 
       # ================================================================
-      # 透明度设置
+      # 透明度
       # ================================================================
       background_opacity = "0.8";
       dynamic_background_opacity = "yes";
 
       # ================================================================
-      # 快捷键映射
+      # 主题颜色（Gruvbox Dark Hard）
       # ================================================================
-      # 复制
-      "map ctrl+c" = "copy_or_interrupt";
+      foreground = "#ebdbb2";
+      background = "#1d2021";
+      selection_foreground = "#1d2021";
+      selection_background = "#ebdbb2";
+      url_color = "#83a598";
+      cursor = "#ebdbb2";
+      cursor_text_color = "#1d2021";
+      active_border_color = "#83a598";
+      inactive_border_color = "#3c3836";
 
-      # 搜索（水平分屏打开搜索）
+      # 16 色调色板
+      color0 = "#282828";   color8  = "#928374";  # Black
+      color1 = "#cc241d";   color9  = "#fb4934";  # Red
+      color2 = "#98971a";   color10 = "#b8bb26";  # Green
+      color3 = "#d79921";   color11 = "#fabd2f";  # Yellow
+      color4 = "#458588";   color12 = "#83a598";  # Blue
+      color5 = "#b16286";   color13 = "#d3869b";  # Magenta
+      color6 = "#689d6a";   color14 = "#8ec07c";  # Cyan
+      color7 = "#a89984";   color15 = "#ebdbb2";  # White
+
+      # ================================================================
+      # 快捷键
+      # ================================================================
+      "map ctrl+c" = "copy_or_interrupt";
+      "map ctrl+shift+c" = "no_op";  # 透传 Ctrl+Shift+C 给 Neovim/Vim
       "map ctrl+f" = "launch --location=hsplit --allow-remote-control kitty +kitten search.py @active-kitty-window-id";
       "map kitty_mod+f" = "launch --location=hsplit --allow-remote-control kitty +kitten search.py @active-kitty-window-id";
-
-      # 滚动
       "map page_up" = "scroll_page_up";
       "map page_down" = "scroll_page_down";
-
-      # 字体缩放
       "map ctrl+plus" = "change_font_size all +1";
       "map ctrl+equal" = "change_font_size all +1";
       "map ctrl+kp_add" = "change_font_size all +1";
@@ -71,17 +84,5 @@
       "map ctrl+0" = "change_font_size all 0";
       "map ctrl+kp_0" = "change_font_size all 0";
     };
-
-    # --- 主题文件 ---
-    # Kitty 主题通过 extraConfig 的 include 指令加载
-    # 主题文件路径：~/.config/kitty/current-theme.conf
-    # 当前主题：Gruvbox Dark Hard
-    # 注意：不使用 themeFile 选项，因为 kitty-themes 包中可能不包含所需主题文件
-    # themeFile = "gruvbox_dark_hard";
-
-    # --- 额外配置（include 等非 key=value 指令） ---
-    extraConfig = ''
-      include current-theme.conf
-    '';
   };
 }

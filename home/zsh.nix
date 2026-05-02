@@ -43,18 +43,9 @@
     # 注意：使用 initContent 替代已弃用的 initExtra
     initContent = ''
       # ============================================================
-      # 终端启动特效（fastfetch）
-      # Kitty 使用 kitty-direct 显示图片 logo，Alacritty 使用纯文本
+      # 终端启动特效（由共享脚本统一管理）
       # ============================================================
-      if [[ "$TERM" == "xterm-kitty" ]]; then
-          fastfetch -c examples/21.jsonc \
-                    --logo ~/.config/fastfetch/openbit.png \
-                    --logo-type kitty-direct \
-                    --logo-width 12 \
-                    --logo-height 0
-      elif [[ "$TERM" == *"alacritty"* ]] || [[ "$TERM" == "alacritty" ]]; then
-          fastfetch
-      fi
+      source "$HOME/.config/shell/init-common.sh"
 
       # 命令高亮样式
       ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern)

@@ -53,7 +53,7 @@
     virt-viewer       # 虚拟机查看器（SPICE/VNC）
     qemu_kvm          # QEMU KVM 支持
     OVMF              # UEFI 固件
-    swtpm             # TPM 模拟
+    # swtpm 已由 virtualisation.libvirtd.qemu.swtpm.enable 自动拉入
     libguestfs        # 虚拟机磁盘工具
     virt-top          # 虚拟机性能监控
     spice             # SPICE 协议支持

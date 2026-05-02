@@ -32,7 +32,7 @@
 
       syntax on
       set number relativenumber
-      set tabstop=4 shiftwidth=4 expandtab
+      set tabstop=2 shiftwidth=2 softtabstop=2 expandtab
       set autoindent smartindent
       set cursorline
       set hlsearch incsearch
@@ -120,15 +120,16 @@
       nnoremap <Leader>w :w<CR>
       nnoremap <Leader>q :q<CR>
 
-      " ==================== 剪贴板快捷键 ====================
-      " Ctrl+Shift+C: 可视化模式下复制选中内容到系统剪贴板（需终端支持 Kitty 键盘协议）
-      vnoremap <C-S-c> "+y
-      " Ctrl+Shift+V: 插入模式下从系统剪贴板粘贴（需终端支持）
-      inoremap <C-S-v> <C-r>+
-      " Leader 快捷键：所有终端均可用的可靠替代方案
-      vnoremap <Leader>y "+y
-      nnoremap <Leader>p "+p
-      vnoremap <Leader>p "+p
+      " ==================== 剪贴板（Wayland 兼容）====================
+      " 注意：终端 Vim 无法区分 Ctrl+C 和 Ctrl+Shift+C
+      "       （键盘协议限制），所以不设 Ctrl+Shift+C 映射。
+      "       改用 Leader 快捷键（终端通用）
+      " Ctrl+Shift+V: 插入模式从系统剪贴板粘贴
+      inoremap <C-S-v> <C-r>=system('wl-paste')<CR>
+      " Leader 快捷键：所有终端可用
+      vnoremap <Leader>y :'<,'>w !wl-copy<CR>gv
+      nnoremap <Leader>p :call setreg('"', system('wl-paste --no-newline'), 'c')<CR>"p
+      vnoremap <Leader>p :<C-u>call setreg('"', system('wl-paste --no-newline'), 'c')<CR>""pgv
 
       if has("autocmd")
           autocmd BufWritePost $MYVIMRC source $MYVIMRC

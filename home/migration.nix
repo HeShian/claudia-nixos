@@ -205,7 +205,7 @@ in
     # classicui.conf — 强制 Dracula 主题
     rm -f "$FCITX5_CONF/classicui.conf"
     cat > "$FCITX5_CONF/classicui.conf" << 'CLASSICUI_EOF'
-    Vertical Candidate List=False
+    Vertical Candidate List=True
     WheelForPaging=True
     Font="Sans 10"
     MenuFont="Sans 10"
@@ -293,17 +293,5 @@ in
     CONFIG_EOF
 
     echo "[fcitx5] Config forcefully deployed (Dracula theme locked)"
-  '';
-
-  # ===========================================================================
-  # 清理：移除 ~/.config/nix/nix.conf（GitHub Token 已移至 /etc/nix/）
-  # 使用 home.activation 删除残留的 nix.conf 文件
-  # ===========================================================================
-  home.activation.cleanupOldNixConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    OLD_NIX_CONF="$HOME/.config/nix/nix.conf"
-    if [ -f "$OLD_NIX_CONF" ] && [ ! -L "$OLD_NIX_CONF" ]; then
-      rm -f "$OLD_NIX_CONF"
-      echo "[cleanup] 已移除旧版 $OLD_NIX_CONF"
-    fi
   '';
 }

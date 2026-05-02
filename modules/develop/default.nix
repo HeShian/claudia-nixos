@@ -11,7 +11,7 @@
     ./build-tools.nix       # 构建工具链
     ./version-control.nix   # 版本控制
     ./editors/vscode.nix    # VS Code 编辑器
-    ./editors/nixvim.nix    # Neovim 编辑器（NixVim）
+    # nixvim 已迁移至 home-manager（home/nixvim.nix）
     ./ai-tools.nix          # AI 编程工具（Claude Code + CC-Switch）
   ];
 }

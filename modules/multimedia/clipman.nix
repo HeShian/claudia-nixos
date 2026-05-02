@@ -8,11 +8,9 @@
 {
   # --- 剪贴板管理工具 ---
   environment.systemPackages = with pkgs; [
-    clipse          # 剪贴板管理器（支持历史记录）
+    # clipse 和 satty 已由 home-manager 的 services.clipse / programs.satty 管理
     wl-clipboard    # Wayland 剪贴板工具
     wtype           # Wayland 键盘输入模拟
-    xdotool         # X11 键盘/鼠标自动化工具
-    satty           # 截图标注工具
     grim            # Wayland 截图工具
     slurp           # Wayland 区域选择工具
     jq              # JSON 处理（窗口截图坐标解析）

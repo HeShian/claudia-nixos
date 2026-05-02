@@ -23,7 +23,7 @@
   virtualisation.incus.preseed = {
     # Web UI 监听地址
     config = {
-      "core.https_address" = "0.0.0.0:17171";
+      "core.https_address" = "127.0.0.1:17171";
     };
 
     # 桥接网络配置

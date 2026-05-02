@@ -31,8 +31,14 @@
   security.sudo.wheelNeedsPassword = false;
 
   # --- 4. SSH 服务 ---
-  # 启用 OpenSSH 服务，允许远程连接
-  services.openssh.enable = true;
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      PermitRootLogin = "prohibit-password";
+      KbdInteractiveAuthentication = false;
+    };
+  };
 
   # 放行 SSH 端口（防火墙默认开启时需要）
   networking.firewall.allowedTCPPorts = [ 22 ];

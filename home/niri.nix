@@ -79,7 +79,7 @@
       // ================ 启动时自动运行的程序 ================
       spawn-at-startup  "noctalia-shell"
       spawn-at-startup "sh" "-c" "sleep 3 && fcitx5 -d"
-      spawn-at-startup "clipse" "--listen"
+      // clipse 由 services.clipse 通过 systemd 管理
 
       // ================ 环境变量设置 ================
       environment {
