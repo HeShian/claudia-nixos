@@ -60,7 +60,7 @@
     ];
 
     # Wayland 前端支持
-    # 在 Hyprland 下有 IME 状态残留 bug，关闭后改用 GTK/QT IM 模块
+    # 在部分环境下有 IME 状态残留 bug，关闭后改用 GTK/QT IM 模块
     fcitx5.waylandFrontend = false;
 
     # 输入法配置（Profile — 默认使用 Rime 霧淞拼音）

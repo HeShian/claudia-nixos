@@ -12,5 +12,5 @@
     powerOnBoot = true;   # 启动时自动打开蓝牙控制器
   };
 
-  # Blueman 未安装 — 蓝牙配对由 Noctalia / Caelestia Shell 内置模块处理
+  # Blueman 未安装 — 蓝牙配对由 Noctalia Shell 内置模块处理
 }

@@ -23,20 +23,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # --- QuickShell：桌面组件框架（DMS/Noctalia 的基础框架） ---
-    quickshell = {
-      url = "git+https://git.outfoxxed.me/quickshell/quickshell";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # --- DankMaterialShell：Material Design 风格桌面 Shell ---
-    dms = {
-      url = "github:AvengeMedia/DankMaterialShell";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.quickshell.follows = "quickshell";  # 跟随根的 quickshell，避免拉取两个版本
-    };
-
-    # --- Noctalia Shell：另一款 QuickShell 风格桌面 Shell ---
+    # --- Noctalia Shell：QuickShell 风格桌面 Shell ---
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -54,12 +41,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # --- Caelestia Shell：基于 QuickShell 的桌面 Shell ---
-    caelestia-shell = {
-      url = "github:caelestia-dots/shell";
+    # --- QuickShell（end-4 需要特定版本，nixpkgs 中 0.2.1 缺少必需功能）---
+    # 定 commit: end-4 illogical-impulse pin 的版本
+    quickshell-end4 = {
+      url = "github:quickshell-mirror/quickshell/7511545ee20664e3b8b8d3322c0ffe7567c56f7a";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.quickshell.follows = "quickshell";
     };
+
   };
 
   # ===========================================================================
@@ -82,8 +70,8 @@
       # 每个目录下的 default.nix 负责聚合该分类的所有子模块
       # ======================================================================
       modules = [
-        # === 第一层：核心系统配置 ===
-        ./configuration.nix
+        # === 第一层：核心系统配置（主机相关） ===
+        ./hosts/westwood/default.nix
 
         # === 第二层：Home Manager 集成（用户级配置） ===
         inputs.home-manager.nixosModules.home-manager
@@ -95,14 +83,14 @@
           home-manager.users.claudia = { inputs, ... }: {
             imports = [
               inputs.nixvim.homeModules.nixvim
-              ./home/default.nix
+              ./home/claudia/default.nix
             ];
           };
         }
 
         # === 第三层：功能模块（按分类目录导入） ===
         ./modules/_core          # 核心系统（引导、网络、Nix 设置、安全）
-        ./modules/desktop        # 桌面环境（GNOME/Hyprland/Niri + Shell）
+        ./modules/desktop        # 桌面环境（Niri + Shell）
         ./modules/locale         # 本地化（中文环境 + 字体）
         ./modules/hardware       # 硬件驱动（NVIDIA、音频、打印）
         ./modules/develop        # 开发工具（语言、构建工具、编辑器）

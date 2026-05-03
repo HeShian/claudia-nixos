@@ -309,7 +309,7 @@
 
       # Ctrl+Shift+C/V（仅 Kitty 终端有效）
       # Kitty 需要配置 ctrl+shift+c → no_op 才能透传给 neovim
-      # 详见 home/kitty.nix
+      # 详见 home/claudia/terminal/kitty.nix
       {
         mode = "v";
         key = "<C-S-c>";

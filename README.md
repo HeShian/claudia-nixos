@@ -74,8 +74,10 @@ This repository contains my personal NixOS system configuration, managed entirel
 /etc/nixos/
 ├── flake.nix                 # Entry point — inputs, system definition
 ├── flake.lock                # Locked dependency versions (reproducible!)
-├── configuration.nix         # Top-level system config (minimal by design)
-├── hardware-configuration.nix # Auto-generated — disk/CPU/hardware info
+├── hosts/                    # Host-specific configs (machine name = westwood)
+│   └── westwood/
+│       ├── default.nix       # Top-level config (minimal — delegates to modules)
+│       └── hardware-configuration.nix # Auto-generated — disk/CPU/hardware info
 ├── modules/                  # System-level modules (11 categories)
 │   ├── _core/               # Boot, networking, Nix settings, security
 │   │   ├── boot.nix         # systemd-boot, EFI, NTFS support
@@ -84,13 +86,13 @@ This repository contains my personal NixOS system configuration, managed entirel
 │   │   ├── security.nix     # User accounts, sudo, SSH, nix-ld
 │   │   ├── system-packages.nix # System-wide packages, VS Code Server
 │   │   └── swap.nix         # 8GB swap file
-│   ├── desktop/             # Hyprland + Niri + Ly DM + theming + shells
-│   │   ├── display-manager.nix  # Ly (TUI login)
+│   ├── desktop/             # Niri + Hyprland + Ly DM + theming + shells
+│   │   ├── display-manager.nix  # Ly (TUI login manager)
 │   │   ├── portal.nix           # XDG Desktop Portal (screen sharing)
-│   │   ├── hyprland.nix         # Hyprland WM enable
 │   │   ├── niri.nix             # Niri WM enable + system config
+│   │   ├── hyprland.nix         # Hyprland WM + end-4 illogical-impulse
 │   │   ├── theming.nix          # System-level Dracula theming
-│   │   └── shells/              # Caelestia (Hyprland) + Noctalia (Niri)
+│   │   └── shells/              # Noctalia (Niri) shell
 │   ├── hardware/            # NVIDIA GPU, PipeWire audio, Bluetooth, printing
 │   ├── locale/              # Chinese locale, Fcitx5 IME, fonts
 │   ├── develop/             # Languages, build tools, AI tools, editors
@@ -102,17 +104,30 @@ This repository contains my personal NixOS system configuration, managed entirel
 │   ├── communication/       # Discord, Telegram
 │   └── applications/        # Browsers, terminals, productivity tools
 └── home/                    # User-level Home Manager configs
-    ├── default.nix          # Entry — packages, env vars, MIME, autostart overrides
-    ├── bash.nix / zsh.nix   # Shell configs (Starship prompt)
-    ├── hyprland.nix / niri.nix        # WM keybinds, layout, theming
-    ├── alacritty.nix / kitty.nix      # Terminal emulators
-    ├── git.nix / vim.nix              # Development tools
-    ├── cava.nix / clipse.nix / satty.nix  # Audio viz, clipboard, screenshots
-    ├── btop.nix / fastfetch.nix           # System monitoring
-    ├── opencode.nix                       # AI coding assistant
-    ├── readline.nix                       # Readline config
-    ├── theming.nix                     # GTK/Kvantum (Dracula dark)
-    └── migration.nix                  # Legacy configs + Noctalia theme generator
+    └── claudia/             # User "claudia"
+        ├── default.nix      # Entry — packages, env vars, MIME, autostart
+        ├── assets/          # Static files (logos, images)
+        ├── shell/           # ZSH, Bash, Readline
+        │   ├── default.nix
+        │   ├── bash.nix
+        │   ├── zsh.nix
+        │   └── readline.nix
+        ├── programs/        # Git, btop, fastfetch, cava, clipse, etc.
+        │   └── default.nix
+        ├── editors/         # Vim, NixVim (Neovim)
+        │   └── default.nix
+        ├── terminal/        # Kitty, Alacritty
+        │   └── default.nix
+        ├── wm/              # Niri + Hyprland user config
+        │   ├── default.nix
+        │   ├── niri.nix     # Niri keybinds, layout, Noctalia colors
+        │   └── hyprland.nix # Hyprland env vars, custom overrides
+        ├── theming/         # GTK/Kvantum (Dracula dark)
+        │   └── default.nix
+        └── input/           # Rime, Fcitx5, Noctalia theme migration
+            ├── default.nix
+            ├── rime.nix
+            └── migration.nix
 ```
 
 **Module loading pattern:** Each directory in `modules/` has a `default.nix` that aggregates its submodules via `imports = [ ... ]`. When adding a new module file, you must register it in the corresponding `default.nix`.
@@ -121,11 +136,11 @@ This repository contains my personal NixOS system configuration, managed entirel
 
 | Area | What's Configured |
 |---|---|
-| **Desktop** | Hyprland + Niri — dual WM, switch at login via Ly DM |
-| **Shell** | Noctalia Shell (Niri) + Caelestia Shell (Hyprland) |
+| **Desktop** | **Niri** (scrollable-tiling) + **Hyprland** (dynamic tiling) — switch at login via Ly DM |
+| **Shell** | **Noctalia Shell** (Niri) or **end-4 illogical-impulse** with QuickShell (Hyprland) |
 | **GPU** | NVIDIA proprietary driver with modesetting + VA-API |
 | **Audio** | PipeWire with WirePlumber, Bluetooth codecs (LDAC/AAC/aptX) |
-| **Bluetooth** | BlueZ, pairing handled by Noctalia / Caelestia Shell built-in UI |
+| **Bluetooth** | BlueZ, pairing handled by Noctalia Shell built-in UI |
 | **Input** | Fcitx5 (Pinyin + Rime) with Nord theme, Wayland text-input-v3 |
 | **Fonts** | Cascadia Code, JetBrains Mono Nerd Font, Noto CJK |
 | **Theme** | Dracula dark — GTK 2/3/4 + Kvantum (Qt5/Qt6) |
@@ -150,9 +165,6 @@ Some desktop tools (Noctalia, Qt theming) need to *write* to their config files 
 
 See `home/migration.nix` for the implementation.
 
-#### Hyprland + Noctalia color pipeline
-
-Noctalia-shell generates `noctalia-colors.conf` at `~/.config/hypr/noctalia/` containing Hyprland color variables (`$primary`, `$surface`, etc.) via its template pipeline. The file doesn't exist until Noctalia runs. To prevent Hyprland startup failures, `home.activation.copyNoctaliaHyprColors` pre-seeds a default file using the same color palette defined in `colors.json`. Once Noctalia-shell starts, it replaces the file with its own dynamic palette (e.g., generated from wallpaper).
 
 #### Niri + Fcitx5 startup timing
 
@@ -164,12 +176,20 @@ Fcitx5 relies on Niri's `zwp_input_method_v2` Wayland protocol to serve terminal
 
 > ⚠️ **Important**: Any change to this chain can silently break Chinese input in terminals. See `AGENTS.md` for the full dependency chain.
 
+#### end-4 illogical-impulse dotfiles (Hyprland)
+
+The end-4 dotfiles project (14K ⭐ on GitHub) is deployed **outside Nix** because its configuration files need runtime write access (QuickShell color generation, wallpaper-based Material You theming). Nix's read-only symlinks would break these features.
+
+Hybrid approach:
+1. **Nix handles all system packages** — Hyprland, QuickShell (pinned commit `7511545e`), Qt6/KDE QML modules, and all end-4 dependencies
+2. **end-4's `setup install-files` handles dotfiles** — regular files in `~/.config/hypr/`, `~/.config/quickshell/ii/`, etc.
+3. **`custom/` directories preserve user overrides** — `~/.config/hypr/custom/` and `~/.config/quickshell/ii/Quickshell/Services/Polkit/` are update-safe
+
+See `modules/desktop/hyprland.nix` and `home/claudia/wm/hyprland.nix` for implementation details.
+
 #### Dracula theme protection
 
-Caelestia Shell changes the global GTK theme (via dconf/gsettings) to its own `adw-gtk3-dark` when switching wallpapers or color schemes, overriding the Dracula dark theme. The fix uses two layers:
-
-1. `GTK_THEME=Dracula` environment variable in Hyprland, which takes higher priority than dconf
-2. `dconf.settings` in `home/theming.nix` to lock `color-scheme`, `gtk-theme`, and `icon-theme` to Dracula values
+`dconf.settings` in `home/theming.nix` locks `color-scheme`, `gtk-theme`, and `icon-theme` to Dracula values.
 
 Additionally, `fcitx5`'s `UseAccentColor` is set to `False` so the input method theme (Nord-Dark) stays consistent regardless of system accent color changes.
 
@@ -222,7 +242,7 @@ sudo nixos-rebuild switch --flake /etc/nixos#westwood
 sudo reboot
 ```
 
-After reboot, log in as user `claudia` via **Ly** (TUI display manager) — choose Niri or Hyprland from the session menu.
+After reboot, log in as user `claudia` via **Ly** (TUI display manager).
 
 > 🔑 The default password is empty (no password set for first login). Run `passwd` immediately after first login.
 
@@ -243,15 +263,44 @@ cat ~/.ssh/id_ed25519.pub  # add to GitHub
 # In the menu, select "部署" (deploy) to compile 霧淞拼音 + 小鹤双拼
 ```
 
+#### Step 6 (optional): Install end-4 illogical-impulse (Hyprland)
+
+The Nix config installs all dependencies. To deploy dotfiles:
+
+```bash
+# Clone end-4 dotfiles
+git clone https://github.com/end-4/dots-hyprland.git ~/dots-hyprland
+cd ~/dots-hyprland
+
+# Deploy dotfiles (skip system packages — Nix handles them)
+bash setup install-files --firstrun --force
+
+# Install Python venv for color generation
+nix-shell sdata/uv/shell.nix --run 'uv venv "$HOME/.local/state/quickshell/.venv" && \
+  source "$HOME/.local/state/quickshell/.venv/bin/activate" && \
+  uv pip install -r sdata/uv/requirements.txt'
+```
+
+Select **Hyprland** (not UWSM) at the Ly login screen.
+Press `Ctrl+Super+T` to choose a wallpaper and generate colors.
+
+#### WM Switching
+
+| At Ly login, select | Result |
+|---|---|
+| **Niri** | Niri WM + Noctalia Shell |
+| **Hyprland** | Hyprland WM + end-4 illogical-impulse QuickShell |
+
 #### Verification
 
-| Component | Test |
-|---|---|
-| Chinese input | `Ctrl+Space` to toggle Fcitx5. In Rime: `Ctrl+\`` to switch schemas (霧淞拼音 / 小鹤双拼) |
-| Neovim IDE | `nvim` to start. `,e` file tree, `,ff` search files, `,y` copy to clipboard |
-| Bluetooth | Open Caelestia control panel (`Mod+Comma`) → Bluetooth |
-| Screenshot | `Print` for region, `Ctrl+Print` for full-screen |
-| Launcher | `Mod+D` (Caelestia) or `Mod+Z` (Fuzzel, Hyprland only) |
+| Component | Niri | Hyprland |
+|---|---|---|
+| Chinese input | `Ctrl+Space` to toggle. `Mod+F1` to restart fcitx5 | `Ctrl+Space` to toggle |
+| Neovim IDE | `nvim` to start. `,e` file tree, `,ff` search | Same |
+| Screenshot | `Print` region, `Ctrl+Print` full-screen | `Print` region (hyprshot) |
+| Launcher | `Mod+Z` (Fuzzel) | `Super+Space` (QuickShell) or `Super+Z` (Fuzzel) |
+| Bluetooth | Noctalia panel (`Mod+Comma`) | end-4 QuickShell settings |
+| Wallpaper/theme | Noctalia auto-generates from wallpaper | `Ctrl+Super+T` to pick wallpaper |
 
 ### Customization Guide
 
@@ -286,9 +335,7 @@ Rename `westwood` in `flake.nix`:
 
 #### Modifying keybindings
 
-- **Hyprland** keybinds: Edit `home/hyprland.nix` (Hyprland `extraConfig`)
 - **Niri** keybinds: Edit `home/niri.nix` (Niri KDL config)
-- Keep keybinds consistent between the two WMs where possible
 
 ### Troubleshooting
 
@@ -309,7 +356,7 @@ git add <new-file>.nix
 #### Screen sharing not working
 
 - For Niri: `xdg-desktop-portal-gnome` is the backend; check its status: `systemctl --user status xdg-desktop-portal-gnome`
-- For Hyprland: `programs.hyprland.enable` configures its own portal backend
+
 
 #### NVIDIA driver issues
 
@@ -324,7 +371,7 @@ lsmod | grep nvidia
 
 #### Bluetooth not working
 
-- Bluetooth pairing is handled via Noctalia/Caelestia Shell UI (blueman is NOT installed)
+- Bluetooth pairing is handled via Noctalia Shell UI (blueman is NOT installed)
 - Ensure `hardware.bluetooth.enable = true` and `hardware.bluetooth.powerOnBoot = true`
 - Check service: `systemctl status bluetooth`
 
@@ -366,12 +413,10 @@ sudo nixos-rebuild switch --rollback
 |---|---|
 | `nixpkgs/nixos-unstable` | Rolling-release package collection |
 | `nix-community/home-manager` | User-level package and dotfile management |
-| `outfoxxed/quickshell` | Desktop widget framework (foundation for all shells) |
-| `AvengeMedia/DankMaterialShell` | Material Design shell (dms) |
-| `noctalia-dev/noctalia-shell` | Noctalia desktop shell (Niri default) |
-| `caelestia-dots/shell` | Caelestia desktop shell (Hyprland default) |
+| `noctalia-dev/noctalia-shell` | Noctalia desktop shell (Niri) |
 | `nix-community/nixvim` | Neovim configuration framework |
 | `nix-community/nixos-vscode-server` | VS Code remote development support |
+| `quickshell-mirror/quickshell` (pinned `7511545e`) | QuickShell for end-4 illogical-impulse (Hyprland) |
 
 ---
 
@@ -432,13 +477,12 @@ sudo nixos-rebuild switch --rollback
 │   │   ├── security.nix     # 用户账户、sudo、SSH、nix-ld
 │   │   ├── system-packages.nix # 系统级包、VS Code Server
 │   │   └── swap.nix         # 8GB 交换文件
-│   ├── desktop/             # Hyprland + Niri + Ly DM + 主题 + Shell
+│   ├── desktop/             # Niri + Ly DM + 主题 + Shell
 │   │   ├── display-manager.nix  # Ly（TUI 登录管理器）
 │   │   ├── portal.nix           # XDG 桌面门户（屏幕共享）
-│   │   ├── hyprland.nix         # Hyprland WM 启用
 │   │   ├── niri.nix             # Niri WM 启用 + 系统配置
 │   │   ├── theming.nix          # 系统级 Dracula 主题
-│   │   └── shells/              # Caelestia（Hyprland）+ Noctalia（Niri）
+│   │   └── shells/              # Noctalia（Niri 用）
 │   ├── hardware/            # NVIDIA 驱动、PipeWire 音频、蓝牙、打印
 │   ├── locale/              # 中文环境、Fcitx5 输入法、字体
 │   ├── develop/             # 编程语言、构建工具、AI 工具、编辑器
@@ -452,7 +496,7 @@ sudo nixos-rebuild switch --rollback
 └── home/                    # 用户级 Home Manager 配置
     ├── default.nix          # 入口 — 软件包、环境变量、MIME、启动覆盖
     ├── bash.nix / zsh.nix   # Shell 配置(Starship 提示符)
-    ├── hyprland.nix / niri.nix        # 窗口管理器键位、布局、主题
+    ├── niri.nix                       # 窗口管理器键位、布局、主题
     ├── alacritty.nix / kitty.nix      # 终端模拟器
     ├── git.nix / vim.nix              # 开发工具
     ├── cava.nix / clipse.nix / satty.nix  # 音频可视化、剪贴板、截图
@@ -471,11 +515,11 @@ sudo nixos-rebuild switch --rollback
 
 | 领域 | 配置内容 |
 |---|---|
-| **桌面** | Hyprland + Niri — 双 WM，通过 Ly DM 登录切换 |
-| **Shell** | Noctalia Shell（Niri）+ Caelestia Shell（Hyprland） |
+| **桌面** | Niri — Wayland 窗口管理器，通过 Ly DM 登录 |
+| **Shell** | Noctalia Shell（Niri） |
 | **显卡** | NVIDIA 闭源驱动 + modesetting + VA-API 硬件解码 |
 | **音频** | PipeWire + WirePlumber，蓝牙编解码（LDAC/AAC/aptX） |
-| **蓝牙** | BlueZ，Noctalia / Caelestia Shell 内置配对界面管理 |
+| **蓝牙** | BlueZ，Noctalia Shell 内置配对界面管理 |
 | **输入法** | Fcitx5（拼音 + Rime 中古音），Nord 主题，Wayland text-input-v3 |
 | **字体** | Cascadia Code、JetBrains Mono Nerd Font、Noto CJK |
 | **主题** | Dracula 暗色 — GTK 2/3/4 + Kvantum（Qt5/Qt6） |
@@ -502,9 +546,6 @@ sudo nixos-rebuild switch --rollback
 
 实现详见 `home/migration.nix`。
 
-#### Hyprland + Noctalia 颜色管道
-
-Noctalia-shell 通过其模板管道在 `~/.config/hypr/noctalia/` 生成 `noctalia-colors.conf`，包含 Hyprland 颜色变量（`$primary`、`$surface` 等）。该文件在 Noctalia 运行前不存在。为防止 Hyprland 启动失败，`home.activation.copyNoctaliaHyprColors` 使用 `colors.json` 中相同的调色板预置默认文件。Noctalia-shell 启动后会用其动态调色板（例如从壁纸生成）替换该文件。
 
 #### Niri + Fcitx5 启动时序
 
@@ -518,10 +559,7 @@ Fcitx5 依赖 Niri 的 `zwp_input_method_v2` Wayland 协议为终端模拟器（
 
 #### Dracula 主题保护
 
-Caelestia Shell 切换壁纸或配色时会通过 dconf/gsettings 把全局 GTK 主题改为自己的 `adw-gtk3-dark`，覆盖 Dracula 暗色主题。修复分两层：
-
-1. Hyprland 环境变量 `GTK_THEME=Dracula`，优先级高于 dconf
-2. `home/theming.nix` 中的 `dconf.settings` 锁定 `color-scheme`、`gtk-theme`、`icon-theme` 为 Dracula 值
+`home/theming.nix` 中的 `dconf.settings` 锁定 `color-scheme`、`gtk-theme`、`icon-theme` 为 Dracula 值。
 
 此外，fcitx5 的 `UseAccentColor` 设为 `False`，确保输入法 Nord-Dark 主题不受系统 accent 颜色影响。
 
@@ -574,7 +612,7 @@ sudo nixos-rebuild switch --flake /etc/nixos#westwood
 sudo reboot
 ```
 
-重启后通过 **Ly**（TUI 登录管理器）以用户 `claudia` 登录，在会话菜单中选择 Niri 或 Hyprland。
+重启后通过 **Ly**（TUI 登录管理器）以用户 `claudia` 登录，Niri 自动启动。
 
 #### 第五步：首次设置
 
@@ -599,9 +637,9 @@ cat ~/.ssh/id_ed25519.pub  # 添加到 GitHub
 |---|---|
 | 中文输入 | `Ctrl+Space` 切换。Rime 下 `Ctrl+\`` 切换方案（霧淞拼音/小鹤双拼） |
 | Neovim IDE | `nvim` 启动。`,e` 文件树，`,ff` 搜索文件，`,y` 复制到剪贴板 |
-| 蓝牙 | 打开 Caelestia 控制面板 (`Mod+Comma`) → 蓝牙 |
+| 蓝牙 | 打开 Noctalia 控制面板 (`Mod+Comma`) → 蓝牙 |
 | 截图 | `Print` 区域截图，`Ctrl+Print` 全屏截图 |
-| 启动器 | `Mod+D`（Caelestia）或 `Mod+Z`（Fuzzel，仅 Hyprland） |
+| 启动器 | `Mod+Z`（Fuzzel）或 `Mod+D`（Niri） |
 
 <a id="customization-guide-1"></a>
 
@@ -635,9 +673,7 @@ cat ~/.ssh/id_ed25519.pub  # 添加到 GitHub
 
 #### 修改快捷键
 
-- **Hyprland**：编辑 `home/hyprland.nix` 中的 `extraConfig`
 - **Niri**：编辑 `home/niri.nix` 中的 KDL 配置
-- 尽量保持两个 WM 的快捷键一致
 
 <a id="troubleshooting-1"></a>
 
@@ -660,7 +696,7 @@ git add <新文件>.nix
 #### 屏幕共享不工作
 
 - Niri：使用 `xdg-desktop-portal-gnome` 作为后端，检查状态：`systemctl --user status xdg-desktop-portal-gnome`
-- Hyprland：`programs.hyprland.enable` 会自动配置自己的 portal 后端
+
 
 #### NVIDIA 驱动问题
 
@@ -675,7 +711,7 @@ lsmod | grep nvidia
 
 #### 蓝牙不工作
 
-- 蓝牙配对通过 Noctalia/Caelestia Shell 界面处理（未安装 blueman）
+- 蓝牙配对通过 Noctalia Shell 界面处理（未安装 blueman）
 - 确保 `hardware.bluetooth.enable = true` 和 `hardware.bluetooth.powerOnBoot = true`
 - 检查服务：`systemctl status bluetooth`
 
@@ -721,12 +757,10 @@ sudo nixos-rebuild switch --rollback
 |---|---|
 | `nixpkgs/nixos-unstable` | 滚动更新的软件包集合 |
 | `nix-community/home-manager` | 用户级软件包和配置文件管理 |
-| `outfoxxed/quickshell` | 桌面组件框架（所有 Shell 的基础） |
-| `AvengeMedia/DankMaterialShell` | Material Design 风格桌面 Shell |
-| `noctalia-dev/noctalia-shell` | Noctalia 桌面 Shell（Niri 默认） |
-| `caelestia-dots/shell` | Caelestia 桌面 Shell（Hyprland 默认） |
+| `noctalia-dev/noctalia-shell` | Noctalia 桌面 Shell（Niri 用） |
 | `nix-community/nixvim` | Neovim 配置框架 |
 | `nix-community/nixos-vscode-server` | VS Code 远程开发支持 |
+| `quickshell-mirror/quickshell` (定 commit `7511545e`) | end-4 illogical-impulse 所需的 QuickShell（Hyprland 用） |
 
 ---
 

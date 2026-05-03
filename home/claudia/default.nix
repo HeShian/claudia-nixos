@@ -1,38 +1,26 @@
 # =============================================================================
-# 文件名:   home/default.nix
-# 功能描述: Home Manager 用户级配置入口
+# 文件名:   home/claudia/default.nix
+# 功能描述: Home Manager 用户级配置入口（claudia 用户）
 # 说明:     管理用户 claudia 的个人软件包、Shell 配置和桌面应用配置。
 #           所有配置均从 stow 管理的 dotfiles 迁移至 Home Manager 统一管理。
 #           注意：系统级软件包在 modules/ 各子模块中管理，
 #           此处仅管理用户级独有配置。
 # =============================================================================
-{ config, pkgs, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 {
   # --- 状态版本 ---
   home.stateVersion = "26.05";
 
-  # --- 导入子模块 ---
+  # --- 导入子模块（按分类聚合） ---
   imports = [
-    ./zsh.nix           # ZSH Shell 配置
-    ./bash.nix          # Bash Shell 配置
-    ./vim.nix           # Vim/Neovim 配置
-    ./git.nix           # Git 配置
-    ./readline.nix      # Readline（命令行输入）配置
-    ./alacritty.nix     # Alacritty 终端配置
-    ./kitty.nix         # Kitty 终端配置
-    ./btop.nix          # btop 系统监控配置
-    ./fastfetch.nix     # fastfetch 系统信息配置
-    ./hyprland.nix      # Hyprland 窗口管理器配置
-    ./niri.nix          # Niri 窗口管理器配置
-    ./opencode.nix      # OpenCode AI 编码助手配置
-    ./theming.nix       # GTK / Kvantum 主题配置（Dracula）
-    ./migration.nix     # 从 ~/.config/ 迁移的遗留配置（fuzzel/noctalia/qt/remmina）
-    ./nixvim.nix        # Neovim 编辑器（NixVim）— 完整的 IDE 配置
-    ./rime.nix          # Rime 输入法配置（霧淞拼音 + 小鹤双拼）
-    ./cava.nix          # Cava 音频可视化配置
-    ./satty.nix         # Satty 截图标注工具配置
-    ./clipse.nix        # Clipse 剪贴板管理器配置
+    ./shell/default.nix      # ZSH、Bash、Readline
+    ./programs/default.nix   # Git、btop、fastfetch、cava、satty、opencode、clipse
+    ./editors/default.nix    # Vim、NixVim
+    ./terminal/default.nix   # Alacritty、Kitty
+    ./wm/default.nix         # Niri
+    ./theming/default.nix    # GTK、Kvantum、dconf
+    ./input/default.nix      # Rime、Fcitx5、Noctalia 迁移
   ];
 
   # --- 用户级软件包 ---
@@ -50,7 +38,13 @@
   home.sessionVariables = {
     EDITOR = "nvim";
     VISUAL = "nvim";
+    TERMINAL = "kitty";  # Thunar 右键"Open Terminal Here"使用 Kitty
   };
+
+  # --- Xfce 配置：Thunar 默认终端（exo-open 查找路径） ---
+  home.file.".config/xfce4/helpers.rc".text = ''
+    TerminalEmulator=kitty
+  '';
 
   # ===========================================================================
   # Nautilus 文件管理器配置
@@ -115,7 +109,7 @@
     };
   };
 
-  # --- 禁用 Fcitx5 XDG 自动启动（由 Niri/Hyprland 的 spawn-at-startup 管理） ---
+  # --- 禁用 Fcitx5 XDG 自动启动（由 Niri 的 spawn-at-startup 管理） ---
   # 避免 systemd 在 compositor 协议栈未就绪时过早启动 fcitx5
   # 导致终端模拟器（kitty/alacritty）的 zwp_text_input_v3 无法注册
   xdg.configFile."autostart/org.fcitx.Fcitx5.desktop" = {
@@ -125,6 +119,30 @@
       Hidden=true
     '';
   };
+
+  # --- Fuzzel 启动器主题（Dracula Dark） ---
+  xdg.configFile."fuzzel/fuzzel.ini".text = ''
+    [colors]
+    background=282a36ee
+    text=f8f8f2
+    prompt=bd93f9
+    input=6272a4
+    placeholder=6272a4
+    selection=44475a
+    selection-text=f8f8f2
+    border=bd93f9
+    match=ffb86c
+    selection-match=ffb86c
+    counter=6272a4
+    description=6272a4
+
+    [border]
+    width=2
+    radius=8
+
+    [dmenu]
+    display=-- AutoComplete
+  '';
 
   # --- 启用 Home Manager ---
   programs.home-manager.enable = true;

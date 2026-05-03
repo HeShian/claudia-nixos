@@ -32,7 +32,6 @@ nix flake update --flake /etc/nixos
 | WM | 默认 Shell | 配置文件 |
 |---|---|---|
 | Niri（滚动平铺） | Noctalia Shell | `home/niri.nix`（用户配置）+ `modules/desktop/niri.nix`（系统启用） |
-| Hyprland（动态平铺） | Caelestia Shell | `home/hyprland.nix`（用户配置）+ `modules/desktop/hyprland.nix`（系统启用） |
 
 Shell 通过 Flake 外部依赖安装（`modules/desktop/shells/`），**不在 `modules/` 中直接引用包名。**
 
@@ -57,7 +56,7 @@ fcitx5 依赖 Niri 的 `zwp_input_method_v2` 协议为终端模拟器（kitty/al
 
 ### 蓝牙
 
-只启用 BlueZ 守护进程（`hardware.bluetooth.enable = true`），配对由 Noctalia / Caelestia Shell 内置界面处理，**不安装** blueman 或 gnome-bluetooth。
+只启用 BlueZ 守护进程（`hardware.bluetooth.enable = true`），配对由 Noctalia Shell 内置界面处理，**不安装** blueman 或 gnome-bluetooth。
 
 ### 输入法环境变量
 
@@ -65,7 +64,7 @@ fcitx5 依赖 Niri 的 `zwp_input_method_v2` 协议为终端模拟器（kitty/al
 - `GTK_IM_MODULE=fcitx`、`QT_IM_MODULE=fcitx`、`SDL_IM_MODULE=fcitx` → 绕过 compositor，通过 DBus 直连 fcitx5
 - `GLFW_IM_MODULE=ibus` → GLFW 应用使用 IBus 协议（fcitx5 兼容）
 
-Niri 环境块中还额外设置了 `XMODIFIERS` 和 `DISPLAY`，**仅 Niri 需要**（Hyprland 的会话管理会自动处理）。
+Niri 环境块中还额外设置了 `XMODIFIERS` 和 `DISPLAY`。
 
 ## 文件命名与风格
 

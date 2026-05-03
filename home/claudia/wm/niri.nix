@@ -1,13 +1,30 @@
 # =============================================================================
-# 文件名:   home/niri.nix
+# 文件名:   home/claudia/wm/niri.nix
 # 功能描述: Niri 窗口管理器用户级配置
 # 说明:     从 ~/dotfiles/.config/niri/ 迁移至 Home Manager 管理。
 #           配置 Niri 的输入设备、光标、布局、快捷键和自动启动程序。
 #           注意：系统级启用（programs.niri.enable）在系统配置中管理。
 # =============================================================================
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
+  # ===========================================================================
+  # Fuzzel 启动器主题（Noctalia 风格配色）
+  # 确保 fuzzel --config 能找到主题文件
+  # ===========================================================================
+  xdg.configFile."fuzzel/themes/noctalia.ini".text = ''
+    [colors]
+    background=111415dd
+    text=e1e3e4
+    prompt=5ed4fd
+    placeholder=c0c8cc
+    input=5ed4fd
+    border=5ed4fd
+    selection=1d2022
+    selection-text=e1e3e4
+    counter=c0c8cc
+  '';
+
   # ===========================================================================
   # Niri 配置（通过 xdg.configFile 管理配置文件）
   # Niri 使用 KDL 格式的配置文件，Home Manager 暂未提供原生 programs.niri 模块，
@@ -203,7 +220,7 @@
           // -------- 启动器与系统应用 --------
           Mod+Return hotkey-overlay-title="打开 (Kitty)" { spawn "kitty"; }
           Mod+T hotkey-overlay-title="打开 (Alacritty)" { spawn "alacritty"; }
-          Mod+D hotkey-overlay-title="Fuzzel" { spawn-sh "fuzzel --config ~/.config/fuzzel/themes/noctalia"; }
+          Mod+D hotkey-overlay-title="Fuzzel" { spawn-sh "fuzzel --config ~/.config/fuzzel/themes/noctalia.ini"; }
           Mod+B hotkey-overlay-title="firefox" { spawn "firefox"; }
           Mod+E hotkey-overlay-title="Thunar" { spawn "thunar"; }
           Mod+Alt+A hotkey-overlay-title="区域截图" { screenshot; }
@@ -356,45 +373,58 @@
   };
 
   # ===========================================================================
-  # Niri Noctalia 颜色配置
-  # 从备份恢复：noctalia.kdl 定义 Niri 窗口边框/聚焦环/阴影颜色
+  # Niri Noctalia 颜色配置 — 使用 home.activation 而非 xdg.configFile
+  # xdg.configFile 创建指向 Nix store 的只读符号链接，阻止 Noctalia
+  # 模板处理器写入 noctalia.kdl。使用 activation 脚本部署为真实文件，
+  # 使得 Noctalia 的配色模板系统（template-processor.py）可以正常更新颜色。
   # ===========================================================================
-  xdg.configFile."niri/noctalia.kdl".text = ''
-    layout {
+  home.activation.installNoctaliaKdl = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    NOCTALIA_KDL="$HOME/.config/niri/noctalia.kdl"
 
-        focus-ring {
-            active-color   "#8fbcbb"
-            inactive-color "#2e3440"
-            urgent-color   "#bf616a"
-        }
+    # 如果文件不存在或是 Nix store 的符号链接，则创建/覆盖为真实文件
+    if [ ! -f "$NOCTALIA_KDL" ] || [ -L "$NOCTALIA_KDL" ]; then
+      mkdir -p "$(dirname "$NOCTALIA_KDL")"
+      # 先删除旧的符号链接（指向 Nix store 只读文件系统）
+      rm -f "$NOCTALIA_KDL"
+      cat > "$NOCTALIA_KDL" << 'KDL_EOF'
+layout {
 
-        border {
-            active-color   "#8fbcbb"
-            inactive-color "#2e3440"
-            urgent-color   "#bf616a"
-        }
-
-        shadow {
-            color "#00000070"
-        }
-
-        tab-indicator {
-            active-color   "#8fbcbb"
-            inactive-color "#326766"
-            urgent-color   "#bf616a"
-        }
-
-        insert-hint {
-            color "#8fbcbb80"
-        }
+    focus-ring {
+        active-color   "#8fbcbb"
+        inactive-color "#2e3440"
+        urgent-color   "#bf616a"
     }
 
-    recent-windows {
-        highlight {
-            active-color "#8fbcbb"
-            urgent-color "#bf616a"
-        }
+    border {
+        active-color   "#8fbcbb"
+        inactive-color "#2e3440"
+        urgent-color   "#bf616a"
     }
+
+    shadow {
+        color "#00000070"
+    }
+
+    tab-indicator {
+        active-color   "#8fbcbb"
+        inactive-color "#326766"
+        urgent-color   "#bf616a"
+    }
+
+    insert-hint {
+        color "#8fbcbb80"
+    }
+}
+
+recent-windows {
+    highlight {
+        active-color "#8fbcbb"
+        urgent-color "#bf616a"
+    }
+}
+KDL_EOF
+      echo "[niri] Noctalia KDL deployed as real file (writable)"
+    fi
   '';
 
   # ===========================================================================

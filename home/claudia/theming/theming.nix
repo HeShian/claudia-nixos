@@ -38,16 +38,6 @@
   # 通过符号链接将主题文件部署到 ~/.config/Kvantum/
   # ===========================================================================
 
-  # ===========================================================================
-  # 锁定 dconf 外观设置（防止 Caelestia Shell 切换壁纸时覆写）
-  # ===========================================================================
-  dconf.settings = {
-    "org/gnome/desktop/interface" = {
-      color-scheme = "prefer-dark";
-      gtk-theme = "Dracula";
-      icon-theme = "Dracula";
-    };
-  };
   xdg.configFile = {
     # Kvantum 主配置文件：指定 Dracula 为当前主题
     "Kvantum/kvantum.kvconfig".text = ''

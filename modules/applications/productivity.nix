@@ -31,6 +31,7 @@
     # === 文件管理 ===
     yazi      # 终端文件管理器
     thunar    # 轻量级桌面文件管理器
+    xfce4-exo # Thunar 终端启动依赖（"Open Terminal Here"）
 
     # === 笔记与知识管理 ===
     obsidian  # Obsidian 笔记应用

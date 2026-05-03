@@ -1,5 +1,5 @@
 # =============================================================================
-# 文件名:   home/migration.nix
+# 文件名:   home/claudia/input/migration.nix
 # 功能描述: 从 ~/.config/ 迁移至 Home Manager 管理的配置文件
 # 说明:     所有之前未受 Nix 管理的配置文件统一在此管理，
 #           确保系统配置的完整可复现性
@@ -58,43 +58,32 @@ let
     PLUGINS_EOF
   '';
 
-  # =========================================================================
-  # Hyprland Noctalia 颜色配置（noctalia-shell 模板管线在运行时生成的
-  # noctalia-colors.conf 的默认版本）。颜色值与 colors.json 保持一致。
-  # noctalia-shell 首次运行时会用自己的调色板覆盖此文件。
-  # =========================================================================
-  noctaliaHyprColorsDefaults = pkgs.runCommand "noctalia-hypr-colors" {} ''
-    mkdir -p $out
-    cat > $out/noctalia-colors.conf << 'EOF'
-    $primary = rgb(5ed4fd)
-    $surface = rgb(111415)
-    $secondary = rgb(b3cad5)
-    $error = rgb(ffb4ab)
-    $tertiary = rgb(c4c3eb)
-    $surface_lowest = rgb(0a0d0f)
-
-    general {
-        col.active_border = $primary
-        col.inactive_border = $surface
-    }
-
-    group {
-        col.border_active = $secondary
-        col.border_inactive = $surface
-        col.border_locked_active = $error
-        col.border_locked_inactive = $surface
-
-        groupbar {
-            col.active = $secondary
-            col.inactive = $surface
-            col.locked_active = $error
-            col.locked_inactive = $surface
-        }
-    }
-    EOF
-  '';
 in
 {
+  # ===========================================================================
+  # Noctalia 默认配置文件 — 作为真实文件部署（非符号链接）
+  # 使 Noctalia 的配色模板处理系统可写入更新这些文件。
+  # ===========================================================================
+  home.activation.installNoctaliaDefaults = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    NOCTALIA_DIR="$HOME/.config/noctalia"
+    mkdir -p "$NOCTALIA_DIR"
+
+    deploy_noctalia_file() {
+      local src="$1"
+      local dst="$2"
+      # 仅在文件不存在或为符号链接时部署（保留 Noctalia 运行时的修改）
+      if [ ! -f "$dst" ] || [ -L "$dst" ]; then
+        cp -f "$src" "$dst"
+        chmod +w "$dst"
+        echo "[noctalia] Deployed: $dst"
+      fi
+    }
+
+    deploy_noctalia_file ${noctaliaDefaults}/noctalia/colors.json "$NOCTALIA_DIR/colors.json"
+    deploy_noctalia_file ${noctaliaDefaults}/noctalia/settings.json "$NOCTALIA_DIR/settings.json"
+    deploy_noctalia_file ${noctaliaDefaults}/noctalia/plugins.json "$NOCTALIA_DIR/plugins.json"
+  '';
+
   # ===========================================================================
   # Fcitx5 Dracula 主题 — 作为真实文件部署到 ~/.local/share/fcitx5/themes/Dracula/
   # （xdg.dataFile 的符号链接在 fcitx5 搜索路径中可能不可见）
@@ -294,4 +283,5 @@ in
 
     echo "[fcitx5] Config forcefully deployed (Dracula theme locked)"
   '';
+
 }

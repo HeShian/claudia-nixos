@@ -17,6 +17,9 @@
     cascadia-code                    # Microsoft Cascadia Code
     nerd-fonts.jetbrains-mono        # JetBrains Mono Nerd Font（带图标，终端用）
 
+    # === 图标字体 ===
+    material-symbols                 # Material Symbols 图标字体
+
     # === Noto 字体系列 ===
     noto-fonts                       # Noto 基础字体
     noto-fonts-cjk-sans              # Noto 简体中文黑体（思源黑体）

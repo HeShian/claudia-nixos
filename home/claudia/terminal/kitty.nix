@@ -70,7 +70,9 @@
       # 快捷键
       # ================================================================
       "map ctrl+c" = "copy_or_interrupt";
-      "map ctrl+shift+c" = "no_op";  # 透传 Ctrl+Shift+C 给 Neovim/Vim
+      # nvim 中的 Ctrl+Shift+C 需要 Kitty 透传 → no_op
+      # 参考 home/claudia/editors/nixvim.nix:311
+      "map ctrl+shift+c" = "no_op";
       "map ctrl+f" = "launch --location=hsplit --allow-remote-control kitty +kitten search.py @active-kitty-window-id";
       "map kitty_mod+f" = "launch --location=hsplit --allow-remote-control kitty +kitten search.py @active-kitty-window-id";
       "map page_up" = "scroll_page_up";

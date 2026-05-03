@@ -1,5 +1,5 @@
 # =============================================================================
-# 文件名:   home/btop.nix
+# 文件名:   home/claudia/programs/btop.nix
 # 功能描述: btop 系统监控工具配置
 # 说明:     从 ~/dotfiles/.config/btop/ 迁移至 Home Manager 管理。
 #           配置主题、布局、颜色方案等。
@@ -19,9 +19,8 @@
       # ================================================================
       # 主题设置
       # ================================================================
-      # 使用自定义 Catppuccin Mocha 主题文件
-      # 注意：使用文件路径而非内置主题名，以保留自定义主题修改
-      color_theme = "~/.config/btop/themes/catppuccin_mocha.theme";
+      # 使用 btop 内置 Catppuccin Mocha 主题
+      color_theme = "catppuccin_mocha";
       theme_background = false;          # 使用终端背景色（实现透明效果）
       truecolor = true;                  # 启用 24 位真彩色
 

@@ -24,7 +24,7 @@
     kdePackages.qt6ct                   # Qt6 外观配置工具
 
     # === GTK 主题可视化配置工具 ===
-    nwg-look                            # GTK 设置编辑器（Wayland 原生，适配 Hyprland）
+    nwg-look                            # GTK 设置编辑器（Wayland 原生）
     lxappearance                        # GTK 主题/字体/图标切换器（经典工具）
   ];
 

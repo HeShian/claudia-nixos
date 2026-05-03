@@ -1,5 +1,5 @@
 # =============================================================================
-# 文件名:   home/fastfetch.nix
+# 文件名:   home/claudia/programs/fastfetch.nix
 # 功能描述: fastfetch 系统信息工具配置
 # 说明:     配置系统信息显示格式、颜色和布局。
 #           - Logo 在 config.jsonc 中设为 "none"，实际 logo 由 bash.nix 启动时通过
@@ -105,5 +105,5 @@
   # Logo 图片文件
   # 从备份中恢复的 openbit.png，用于 Kitty 终端中 fastfetch 显示
   # ===========================================================================
-  home.file.".config/fastfetch/openbit.png".source = ./openbit.png;
+  home.file.".config/fastfetch/openbit.png".source = ../assets/openbit.png;
 }
