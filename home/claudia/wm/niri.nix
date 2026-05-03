@@ -221,7 +221,7 @@
           Mod+Return hotkey-overlay-title="打开 (Kitty)" { spawn "kitty"; }
           Mod+T hotkey-overlay-title="打开 (Alacritty)" { spawn "alacritty"; }
           Mod+D hotkey-overlay-title="Fuzzel" { spawn-sh "fuzzel --config ~/.config/fuzzel/themes/noctalia.ini"; }
-          Mod+B hotkey-overlay-title="firefox" { spawn "firefox"; }
+          Mod+W hotkey-overlay-title="firefox" { spawn "firefox"; }
           Mod+E hotkey-overlay-title="Thunar" { spawn "thunar"; }
           Mod+Alt+A hotkey-overlay-title="区域截图" { screenshot; }
           Print hotkey-overlay-title="区域截图" { screenshot; }
